@@ -23,7 +23,7 @@ fun Navigation() {
     val startRoute = Routes.Home
 
     NavHost(navController = navController, startDestination = startRoute) {
-        composable(Routes.Home) { backStackEntry ->
+        composable(Routes.Home) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
             HomeScreen(viewModel = homeViewModel, navController = navController)
         }
