@@ -10,7 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.csanders.commentarii.ui.Navigation
+import androidx.navigation.compose.rememberNavController
+import com.csanders.commentarii.ui.CmtiiNavHost
 import com.csanders.commentarii.ui.theme.CommentariiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,13 +21,19 @@ class CommentariiMainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CommentariiTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Navigation()
-                }
+              StartNav()
             }
         }
+    }
+}
+
+@Composable
+private fun StartNav() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        val navController = rememberNavController()
+        CmtiiNavHost(navController = navController)
     }
 }

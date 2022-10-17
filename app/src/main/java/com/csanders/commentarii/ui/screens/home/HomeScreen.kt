@@ -15,10 +15,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+
+class HomeScreen {
+    companion object {
+        const val route = "home"
+        const val semanticName = "home screen"
+    }
+}
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
@@ -26,6 +36,7 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
         modifier = Modifier
             .fillMaxWidth(0.5f)
             .padding(16.dp)
+            .semantics { contentDescription = HomeScreen.semanticName }
     ) {
         val painter = painterResource(id = viewModel.getKenJennings())
         val description = "My favorite forehead"
