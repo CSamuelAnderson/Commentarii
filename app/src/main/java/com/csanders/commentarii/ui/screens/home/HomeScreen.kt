@@ -22,23 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.csanders.commentarii.ui.screens.home.shared.MenuBarScaffold
-
-//Before continuing, I've decided this should be in the ViewModel. This shouldn't have a class.
-class HomeScreen {
-    companion object {
-        const val route = "home"
-        const val semanticName = "home screen"
-    }
-}
+import com.csanders.commentarii.ui.shared.MenuBarScaffold
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
-    MenuBarScaffold() {
+fun HomeScreen(viewModel: HomeViewModel, onNavigationRequested: (String) -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = HomeScreen.semanticName }
+                .semantics { contentDescription = viewModel.semanticName }
         ) {
             val painter = painterResource(id = viewModel.getKenJennings())
             val description = "My favorite forehead"
@@ -49,8 +40,6 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
             )
         }
     }
-}
-
 
 @Composable
 private fun ImageCard(

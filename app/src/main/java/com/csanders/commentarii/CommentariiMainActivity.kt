@@ -6,12 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.csanders.commentarii.ui.CmtiiNavHost
+import com.csanders.commentarii.ui.shared.MenuBarScaffold
 import com.csanders.commentarii.ui.theme.CommentariiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,6 +33,12 @@ private fun StartNav() {
         color = MaterialTheme.colorScheme.background
     ) {
         val navController = rememberNavController()
-        CmtiiNavHost(navController = navController)
+
+        fun onNavigationRequested(route: String) =
+            navController.navigate(route = route)
+
+        MenuBarScaffold(::onNavigationRequested) {
+            CmtiiNavHost(navController = navController, onNavigationRequested = ::onNavigationRequested)
+        }
     }
 }

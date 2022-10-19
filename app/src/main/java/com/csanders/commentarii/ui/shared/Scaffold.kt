@@ -1,4 +1,4 @@
-package com.csanders.commentarii.ui.screens.home.shared
+package com.csanders.commentarii.ui.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,22 +7,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.csanders.commentarii.ui.screens.home.HomeScreen
-import kotlinx.coroutines.coroutineScope
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuBarScaffold(Body: @Composable () -> Unit) {
+fun MenuBarScaffold(onNavigationRequested: (String) -> Unit, Body: @Composable () -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
-
 
     Scaffold(
         modifier = Modifier
@@ -46,17 +41,13 @@ fun MenuBarScaffold(Body: @Composable () -> Unit) {
             ) {
                 Body()
                 Drawer(
-                    drawerState,
-                    onDrawerClick =  {
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                },
-                onNotDrawerClick = {
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                })
+                    onNavigationRequested = onNavigationRequested,
+                    drawerState = drawerState,
+                    closeDrawerCallback = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                    })
                 if (!drawerState.isOpen) {
                     Box(
                         modifier = Modifier
@@ -95,61 +86,10 @@ private fun TopBar(onMenuClicked: () -> Unit) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Drawer(drawerState: DrawerState, onDrawerClick: () -> Unit, onNotDrawerClick:() -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
-
-    DismissibleNavigationDrawer(
-        modifier = Modifier
-            .background(Color.Transparent),
-        drawerContent = {
-            DrawerContent() {
-                coroutineScope.launch {
-                    onDrawerClick()
-                    //navigate or something?
-                }
-            }
-        },
-        drawerState = drawerState
-    ) {
-        if(drawerState.isOpen){
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.4f)
-                    .clickable(onClick = onNotDrawerClick)
-            )
-        }
-    }
-}
-
-@Composable
-fun DrawerContent(onItemClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.6f)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        repeat(5) {
-            Text(
-                text = "Item number $it",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clickable(onClick = onItemClick),
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-    }
-
-}
-
 @Preview
 @Composable
 fun MenuPreview() {
-    MenuBarScaffold {
+    MenuBarScaffold(onNavigationRequested = {}) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

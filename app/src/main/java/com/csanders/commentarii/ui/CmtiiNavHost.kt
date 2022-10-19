@@ -9,18 +9,18 @@ import androidx.navigation.compose.composable
 import com.csanders.commentarii.ui.screens.home.HomeScreen
 import com.csanders.commentarii.ui.screens.home.HomeViewModel
 
-
 @Composable
 fun CmtiiNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigationRequested: (String) -> Unit
 ) {
-    val startDestination = HomeScreen.route
+    val startDestination = HomeViewModel.route
 
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
-        composable(HomeScreen.route) {
+        composable(HomeViewModel.route) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
-            HomeScreen(viewModel = homeViewModel, navController = navController)
+            HomeScreen(viewModel = homeViewModel, onNavigationRequested)
         }
     }
 
