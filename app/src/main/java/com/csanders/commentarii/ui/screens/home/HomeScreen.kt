@@ -15,14 +15,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.csanders.commentarii.ui.screens.home.shared.MenuBarScaffold
 
+//Before continuing, I've decided this should be in the ViewModel. This shouldn't have a class.
 class HomeScreen {
     companion object {
         const val route = "home"
@@ -32,25 +34,26 @@ class HomeScreen {
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(0.5f)
-            .padding(16.dp)
-            .semantics { contentDescription = HomeScreen.semanticName }
-    ) {
-        val painter = painterResource(id = viewModel.getKenJennings())
-        val description = "My favorite forehead"
-        ImageCard(
-            painter = painter,
-            contentDescription = description,
-            title = description
-        )
+    MenuBarScaffold() {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = HomeScreen.semanticName }
+        ) {
+            val painter = painterResource(id = viewModel.getKenJennings())
+            val description = "My favorite forehead"
+            ImageCard(
+                painter = painter,
+                contentDescription = description,
+                title = description
+            )
+        }
     }
 }
 
 
 @Composable
-fun ImageCard(
+private fun ImageCard(
     painter: Painter,
     contentDescription: String,
     title: String,
@@ -61,7 +64,7 @@ fun ImageCard(
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Box(modifier = Modifier.height(200.dp)) {
+        Box(modifier = Modifier.fillMaxHeight()) {
             Image(
                 painter = painter, contentDescription = contentDescription,
                 contentScale = ContentScale.Crop
