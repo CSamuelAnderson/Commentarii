@@ -23,5 +23,4 @@ fun CmtiiNavHost(
             HomeScreen(viewModel = homeViewModel, onNavigationRequested)
         }
     }
-
 }

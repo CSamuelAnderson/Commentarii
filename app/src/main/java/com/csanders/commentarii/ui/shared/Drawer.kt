@@ -3,6 +3,7 @@ package com.csanders.commentarii.ui.shared
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -45,7 +46,11 @@ fun Drawer(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.4f)
-                    .clickable(onClick = closeDrawerCallback)
+                    .clickable(
+                        onClick = closeDrawerCallback,
+                        interactionSource = MutableInteractionSource(),
+                        indication = null
+                    )
             )
         }
     }
