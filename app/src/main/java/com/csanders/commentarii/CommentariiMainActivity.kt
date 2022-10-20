@@ -32,13 +32,6 @@ private fun StartNav() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        val navController = rememberNavController()
-
-        fun onNavigationRequested(route: String) =
-            navController.navigate(route = route)
-
-        MenuBarScaffold(::onNavigationRequested) {
-            CmtiiNavHost(navController = navController, onNavigationRequested = ::onNavigationRequested)
-        }
+        MenuBarScaffold()
     }
 }

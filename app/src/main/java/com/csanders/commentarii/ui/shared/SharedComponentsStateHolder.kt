@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 
 class SharedComponentsStateHolder @OptIn(ExperimentalMaterial3Api::class) constructor(
     val drawerState: DrawerState,
+    //this one might need to be saveable?
+    val navHostController: NavHostController,
     private val coroutineScope: CoroutineScope
 ) {
 
@@ -34,13 +36,19 @@ class SharedComponentsStateHolder @OptIn(ExperimentalMaterial3Api::class) constr
             else drawerState.open()
         }
     }
+
+    fun onNavigationRequested(route: String) {
+        navHostController.navigate(route)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberSharedComponentsState(
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    coroutineScope: CoroutineScope = rememberCoroutineScope()
-) = remember(drawerState, coroutineScope) {
-    SharedComponentsStateHolder(drawerState, coroutineScope)
+    navHostController: NavHostController = rememberNavController(),
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+
+) = remember(drawerState, navHostController, coroutineScope) {
+    SharedComponentsStateHolder(drawerState, navHostController, coroutineScope)
 }

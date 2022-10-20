@@ -11,11 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.csanders.commentarii.ui.CmtiiNavHost
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuBarScaffold(onNavigationRequested: (String) -> Unit, Destination: @Composable () -> Unit) {
+fun MenuBarScaffold() {
     val stateHolder: SharedComponentsStateHolder = rememberSharedComponentsState()
 
     Scaffold(
@@ -29,9 +30,11 @@ fun MenuBarScaffold(onNavigationRequested: (String) -> Unit, Destination: @Compo
         },
         content = {
             Box(modifier = Modifier.padding(it)) {
-                Destination()
+                CmtiiNavHost(navController = stateHolder.navHostController) { route ->
+                    stateHolder.onNavigationRequested(route)
+                }
                 Drawer(
-                    onNavigationRequested = onNavigationRequested,
+                    onNavigationRequested = {route -> stateHolder.onNavigationRequested(route)},
                     drawerState = stateHolder.drawerState,
                     closeDrawerCallback = {
                         stateHolder.onDrawerShouldClose()
@@ -80,13 +83,5 @@ private fun TopBar(onMenuClicked: () -> Unit) {
 @Preview
 @Composable
 fun MenuPreview() {
-    MenuBarScaffold(onNavigationRequested = {}) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Text(text = "Hello World!")
-        }
-    }
+    MenuBarScaffold()
 }

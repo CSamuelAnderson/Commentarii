@@ -21,6 +21,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.csanders.commentarii.ui.shared.MenuBarScaffold
 
@@ -80,4 +81,10 @@ private fun ImageCard(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun HomePreview() {
+    HomeScreen(viewModel = hiltViewModel<HomeViewModel>(), onNavigationRequested = {})
 }

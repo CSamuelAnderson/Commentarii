@@ -41,6 +41,7 @@ fun Drawer(
         },
         drawerState = drawerState
     ) {
+        //Layout for the part of the screen not covered by the drawer
         if (drawerState.isOpen) {
             Box(
                 modifier = Modifier
