@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.csanders.commentarii.ui.screens.home.HomeScreen
+import com.csanders.commentarii.ui.shared.CmtiiNavHost
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

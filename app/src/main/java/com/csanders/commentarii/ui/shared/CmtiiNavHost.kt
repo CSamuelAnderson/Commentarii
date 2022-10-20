@@ -1,4 +1,4 @@
-package com.csanders.commentarii.ui
+package com.csanders.commentarii.ui.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
