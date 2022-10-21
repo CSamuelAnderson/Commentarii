@@ -1,5 +1,6 @@
 package com.csanders.commentarii.ui.screens.textreader
 
+import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,7 +40,8 @@ fun TextReaderScreen(viewModel: TextReaderViewModel) {
             Text(
 //                modifier = Modifier.fillMaxSize(),
                 text = viewModel.getText(),
-                style = textStyle)
+                style = textStyle
+            )
         }
         TurnPageBanner(
             modifier = Modifier
@@ -60,13 +63,13 @@ private fun TurnPageBanner(
         TurnPageButton(
             modifier = Modifier.fillMaxWidth(0.5f),
             nextPassageName = "Previous Passage",
-            turnPage = TurnPage.Backward,
+            iconImageVector = Icons.Default.ArrowBack,
             contentDescription = "Button to load previous passage"
         )
         TurnPageButton(
             modifier = Modifier.fillMaxWidth(),
             nextPassageName = "Next Passage",
-            turnPage = TurnPage.Forward,
+            iconImageVector = Icons.Default.ArrowForward,
             contentDescription = "Button to load net passage"
         )
     }
@@ -77,10 +80,9 @@ private fun TurnPageButton(
     modifier: Modifier = Modifier,
     onButtonTapped: () -> Unit = {},
     nextPassageName: String,
-    turnPage: TurnPage,
+    iconImageVector: ImageVector,
     contentDescription: String
 ) {
-
     val contextForToast = LocalContext.current.applicationContext
     ExtendedFloatingActionButton(
         modifier = modifier
@@ -90,36 +92,11 @@ private fun TurnPageButton(
         onClick = {
             onButtonTapped
             Toast.makeText(contextForToast, "TODO: Navigate!", Toast.LENGTH_SHORT)
-            .show()},
-    ) {
-        Row {
-            @Composable
-            fun ButtonIcon(imageVector: ImageVector) {
-                Icon(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    imageVector = imageVector,
-                    contentDescription = contentDescription
-                )
-            }
-
-            @Composable
-            fun ButtonText() {
-                Text(text = nextPassageName, style = TextStyle(fontSize = 16.sp))
-            }
-
-            when (turnPage) {
-                TurnPage.Forward -> {
-                    ButtonText()
-                    ButtonIcon(imageVector = Icons.Default.ArrowForward)
-                }
-                TurnPage.Backward -> {
-                    ButtonIcon(imageVector = Icons.Default.ArrowBack)
-                    ButtonText()
-                }
-            }
-
-        }
-    }
+                .show()
+        },
+        text = {Text(text = nextPassageName, style = TextStyle(fontSize = 16.sp))},
+        icon = {Icon(imageVector = iconImageVector, contentDescription = contentDescription)}
+    )
 }
 
 private enum class TurnPage {
