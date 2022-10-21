@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -18,15 +19,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Drawer(
+    modifier: Modifier = Modifier,
     drawerState: DrawerState,
     closeDrawerCallback: () -> Unit,
-    onNavigationRequested: (String) -> Unit
+    onNavigationRequested: (String) -> Unit,
+    Content: @Composable () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val contextForToast = LocalContext.current.applicationContext
 
-    DismissibleNavigationDrawer(
-        modifier = Modifier
+    ModalNavigationDrawer(
+        modifier = modifier
             .background(Color.Transparent),
         drawerContent = {
             DrawerContent() {
@@ -35,12 +38,13 @@ fun Drawer(
                     Toast
                         .makeText(contextForToast, "TODO: Navigate!", Toast.LENGTH_SHORT)
                         .show()
-                    onNavigationRequested
+                    onNavigationRequested("text_reader")
                 }
             }
         },
         drawerState = drawerState
     ) {
+        Content()
         //Layout for the part of the screen not covered by the drawer
         if (drawerState.isOpen) {
             Box(
@@ -57,13 +61,13 @@ fun Drawer(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DrawerContent(onItemClick: () -> Unit) {
-    Column(
+    ModalDrawerSheet(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth(0.6f)
-            .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
         repeat(5) {
             Text(
@@ -74,5 +78,13 @@ private fun DrawerContent(onItemClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.primary
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewDrawerSheet() {
+    DrawerContent {
+
     }
 }

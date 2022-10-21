@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.csanders.commentarii.ui.screens.textreader.TextReaderScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,38 +25,23 @@ fun MenuBarScaffold() {
                     stateHolder.onDrawerChange()
                 }
             )
-        },
-        content = {
-            Box(modifier = Modifier.padding(it)) {
-                CmtiiNavHost(navController = stateHolder.navHostController) { route ->
-                    stateHolder.onNavigationRequested(route)
-                }
-                Drawer(
-                    onNavigationRequested = {route -> stateHolder.onNavigationRequested(route)},
-                    drawerState = stateHolder.drawerState,
-                    closeDrawerCallback = {
-                        stateHolder.onDrawerShouldClose()
-                    })
-                if (stateHolder.drawerState.isClosed) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.2f)
-                            .fillMaxHeight()
-                            //Replace with a swipeable eventually
-                            .clickable(
-                                onClick = {
-                                    stateHolder.onDrawerChange()
-                                },
-                                interactionSource = MutableInteractionSource(),
-                                indication = null
-                            )
+        })
+    {
 
-                    )
-                }
-            }
 
+        Drawer(
+            modifier = Modifier.padding(it),
+            onNavigationRequested = stateHolder::onNavigationRequested,
+            drawerState = stateHolder.drawerState,
+            closeDrawerCallback = stateHolder::onDrawerShouldClose
+        ) {
+
+            CmtiiNavHost(
+                navController = stateHolder.navHostController,
+                onNavigationRequested = stateHolder::onNavigationRequested
+            )
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +59,7 @@ private fun TopBar(onMenuClicked: () -> Unit) {
                 modifier = Modifier.clickable(onClick = onMenuClicked),
                 tint = MaterialTheme.colorScheme.primary
             )
-        }
+        },
     )
 }
 
