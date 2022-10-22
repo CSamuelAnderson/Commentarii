@@ -1,5 +1,7 @@
 package com.csanders.commentarii.utilities
 
+import kotlin.String
+
 //For now we only encode the TEI Lite package
 //Some of which is missing here:
 //Links
@@ -107,7 +109,7 @@ enum class TEIAttributes(val attribute: String) {
 }
 
 //Not all are encoded, just the ones relevant to this project
-enum class TEIFileDescription(element: String) {
+enum class TEIFileDescription(val element: String) {
     //Title
     TitleStatement("titleStmt"),
     Title("title"),
@@ -124,6 +126,7 @@ enum class TEIFileDescription(element: String) {
     //Profile
     ProfileDescription("profileDesc"),
     LanguageUsed("langUsage"),
+    Language("language")
 
 }
 

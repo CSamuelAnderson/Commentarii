@@ -2,13 +2,12 @@ package com.csanders.commentarii.utilities
 
 import android.app.Activity
 import android.os.AsyncTask
-import android.preference.PreferenceManager
-import com.csanders.commentarii.R
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.String
 
 
 //Copy of https://developer.android.com/training/basics/network-ops/xml
