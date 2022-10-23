@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.csanders.commentarii.ui.screens.home.HomeScreen
+import com.csanders.commentarii.ui.screens.home.HomeViewModel
 import com.csanders.commentarii.ui.shared.CmtiiNavHost
 import org.junit.Before
 import org.junit.Rule
@@ -27,14 +28,14 @@ class NavHostTest {
             navController.navigatorProvider.addNavigator(
                 ComposeNavigator()
             )
-            CmtiiNavHost(navController = navController as TestNavHostController)
+            CmtiiNavHost(navController = navController as TestNavHostController) {}
         }
     }
 
     @Test
     fun startDestinationIs_Home() {
         composeTestRule
-            .onNodeWithTag(HomeScreen.semanticName)
+            .onNodeWithTag(HomeViewModel.route)
             .assertIsDisplayed()
     }
 }

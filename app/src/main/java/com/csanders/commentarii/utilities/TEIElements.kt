@@ -5,6 +5,8 @@ import kotlin.String
 //For now we only encode the TEI Lite package
 //Some of which is missing here:
 //Links
+//TODo: We'll probably want the Encoding description somewhere
+//TODO: Some of the attributes should be re-organized so that elements are not in it.
 
 //Part of the TEI Lite package. See https://tei-c.org/release/doc/tei-p5-exemplars/pdf/tei_lite.doc.pdf
 enum class TEIElement(val element: String) {
@@ -106,10 +108,13 @@ enum class TEIAttributes(val attribute: String) {
 
 
 
+
 }
 
 //Not all are encoded, just the ones relevant to this project
 enum class TEIFileDescription(val element: String) {
+   FileDescription("fileDesc"),
+
     //Title
     TitleStatement("titleStmt"),
     Title("title"),

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,26 +29,26 @@ fun TextReaderScreen(viewModel: TextReaderViewModel) {
     val textStyle = MaterialTheme.typography.bodyMedium
     //Columns do not recompose on their own
     //Wrap or move all state into a new area.
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         SelectionContainer(
             modifier = Modifier
-                .fillMaxWidth()
+//                .fillMaxWidth()
+                .fillMaxSize()
         ) {
             Text(
 //                modifier = Modifier.fillMaxSize(),
                 text = viewModel.getText(),
-                style = textStyle
             )
         }
         TurnPageBanner(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(30.dp)
-                .fillMaxHeight()
+                .align(Alignment.BottomCenter)
         )
     }
 }
