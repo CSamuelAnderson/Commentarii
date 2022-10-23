@@ -1,4 +1,4 @@
 package com.csanders.commentarii.datamodel
 
-class Work {
+data class Work(val header: WorkHeader = WorkHeader()) {
 }

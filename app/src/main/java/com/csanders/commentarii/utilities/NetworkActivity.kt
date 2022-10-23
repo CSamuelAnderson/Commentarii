@@ -2,6 +2,7 @@ package com.csanders.commentarii.utilities
 
 import android.app.Activity
 import android.os.AsyncTask
+import com.csanders.commentarii.datamodel.Work
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.io.InputStream
@@ -78,7 +79,7 @@ class NetworkActivity : Activity() {
 
 
             //todo: we'll want this to be our TEIParser
-            val entries: List<Entry> = downloadUrl(urlString)?.use { stream: InputStream ->
+            val entries: List<Work> = downloadUrl(urlString)?.use { stream: InputStream ->
                 // Instantiate the parser
                 //StackOverflowXmlParser().parse(stream)
                 emptyList()
@@ -94,17 +95,15 @@ class NetworkActivity : Activity() {
                 // This section processes the entries list to combine each entry with HTML markup.
                 // Each entry is displayed in the UI as a link that optionally includes
                 // a text summary.
-                entries.forEach { entry ->
-                    append("<p><a href='")
-                    append(entry.link)
-                    append("'>" + entry.title + "</a></p>")
+//                entries.forEach { entry ->
+//                    append("<p><a href='")
+//                    append(entry.link)
+//                    append("'>" + entry.title + "</a></p>")
                     // If the user set the preference to include summary text,
                     // adds it to the display.
-                    if (pref) {
-                        append(entry.summary)
-                    }
-                }
-            }.toString()
+//                }
+            append("TODO")}.toString()
+
         }
 
         // Given a string representation of a URL, sets up a connection and gets
