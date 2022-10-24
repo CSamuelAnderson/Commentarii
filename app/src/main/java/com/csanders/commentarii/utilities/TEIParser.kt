@@ -1,6 +1,5 @@
 package com.csanders.commentarii.utilities
 
-import android.content.Context
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.util.Xml
@@ -68,10 +67,10 @@ class TEIParser() {
     }
 
 
-    //parses the start tag, but returns an empty map.
+    //parses the start tag, and don't ask it to save any data.
     @Throws(XmlPullParserException::class, IOException::class)
     private fun XmlPullParser.skip(tag: String): Map<String, String> {
-        parserLoop(this, tag) { mapOf() }
+        parserLoop(this, tag)
         return mapOf()
     }
 
@@ -81,7 +80,7 @@ class TEIParser() {
     private fun parserLoop(
         parser: XmlPullParser,
         startTag: String,
-        parsingEvents: (String) -> Map<String, String>
+        onTagRead: (String) -> Map<String, String> = { mapOf() }
         //Todo: to generalize, it's possible we'll need to change the value in this pair to a List. That way something like language can have multiple
         //Todo: That, or order the language account for multiple keys.
     ): Map<String, String> {
@@ -106,7 +105,7 @@ class TEIParser() {
 //                parsedElements.putIfAbsent(parser.name, parsingEvents(parser.name))
                 //note the '+' operator allows the second map to override values of the first map.
 //              parsedElements + parsingEvents(parser.name)
-                parsedElements.putAll(parsingEvents(parser.name))
+                parsedElements.putAll(onTagRead(parser.name))
             }
 
             return helper(parser, parsedElements)

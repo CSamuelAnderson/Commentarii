@@ -1,6 +1,5 @@
 package com.csanders.commentarii.ui.screens.textreader
 
-import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,7 +7,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 
 @Composable
-fun TextReaderScreen(viewModel: TextReaderViewModel) {
+fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
 
     val textStyle = MaterialTheme.typography.bodyMedium
     //Columns do not recompose on their own

@@ -26,11 +26,10 @@ import androidx.navigation.NavController
 import com.csanders.commentarii.ui.shared.MenuBarScaffold
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onNavigationRequested: (String) -> Unit) {
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onNavigationRequested: (String) -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = viewModel.semanticName }
         ) {
             val painter = painterResource(id = viewModel.getKenJennings())
             val description = "My favorite forehead"
