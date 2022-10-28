@@ -6,6 +6,7 @@ import android.util.Xml
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.csanders.commentarii.R
+import com.csanders.commentarii.datamodel.Section
 import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.datamodel.WorkHeader
 import org.xmlpull.v1.XmlPullParser
@@ -27,10 +28,9 @@ class TEIParser() {
     @Composable
     @Throws(XmlPullParserException::class, IOException::class, NotFoundException::class)
     fun parseFromResource(resourceID: Int): List<Work> {
-        val resources = Resources.getSystem()
         val goldenAss = R.raw.apuleius_golden_ass_lat
         val context = LocalContext.current
-        val stream = context.resources.openRawResource(goldenAss)
+        val stream = context.resources.openRawResource(resourceID)
         return parse(stream)
     }
 
@@ -62,7 +62,7 @@ class TEIParser() {
 
         //Todo: We're only guaranteed a header if we hit a header tag. But that means we do header null-safety in two places already
         //Todo: Is there a way (maybe from a monad? Maybe from default values?) that we can abstract defualt values away?
-        val work = Work(header)
+        val work = Work(header, Section())
         return listOf(work)
     }
 

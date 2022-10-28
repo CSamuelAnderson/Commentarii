@@ -4,13 +4,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.csanders.commentarii.CommentariiMainActivity
-import com.csanders.commentarii.ui.screens.home.HomeScreen
 import com.csanders.commentarii.ui.screens.home.HomeViewModel
 import com.csanders.commentarii.ui.shared.CmtiiNavHost
 import org.junit.Before
