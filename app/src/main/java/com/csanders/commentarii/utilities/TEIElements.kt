@@ -112,7 +112,7 @@ enum class TEIAttributes(val attribute: String) {
 }
 
 //Not all are encoded, just the ones relevant to this project
-enum class TEIFileDescription(val element: String) {
+enum class TEIHeader(val element: String) {
    FileDescription("fileDesc"),
 
     //Title
