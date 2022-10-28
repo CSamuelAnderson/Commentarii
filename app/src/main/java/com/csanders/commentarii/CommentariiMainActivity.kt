@@ -25,7 +25,7 @@ class CommentariiMainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun StartNav() {
+fun StartNav() {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

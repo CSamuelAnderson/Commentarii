@@ -1,11 +1,9 @@
 package com.csanders.commentarii.utilities
 
-import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.util.Xml
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.Section
 import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.datamodel.WorkHeader
@@ -28,7 +26,6 @@ class TEIParser() {
     @Composable
     @Throws(XmlPullParserException::class, IOException::class, NotFoundException::class)
     fun parseFromResource(resourceID: Int): List<Work> {
-        val goldenAss = R.raw.apuleius_golden_ass_lat
         val context = LocalContext.current
         val stream = context.resources.openRawResource(resourceID)
         return parse(stream)
@@ -46,7 +43,7 @@ class TEIParser() {
     }
 
     private fun readWork(parser: XmlPullParser): List<Work> {
-        lateinit var header: WorkHeader
+        var header = WorkHeader()
 
         //Todo: since a lower-level function returned a data-class instead of a map, we save off the class and just ignore that it returned a map.
         //Todo: Fine for now, but is there a more elegant way?
@@ -59,17 +56,13 @@ class TEIParser() {
                 else -> parser.skip(tag)
             }
         }
-
-        //Todo: We're only guaranteed a header if we hit a header tag. But that means we do header null-safety in two places already
-        //Todo: Is there a way (maybe from a monad? Maybe from default values?) that we can abstract defualt values away?
         val work = Work(header, Section())
         return listOf(work)
     }
 
-
     //parses the start tag, and don't ask it to save any data.
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun XmlPullParser.skip(tag: String): Map<String, String> {
+    private fun XmlPullParser.skip(tag: String): Map<String, List<String>> {
         parserLoop(this, tag)
         return mapOf()
     }
@@ -80,78 +73,104 @@ class TEIParser() {
     private fun parserLoop(
         parser: XmlPullParser,
         startTag: String,
-        onTagRead: (String) -> Map<String, String> = { mapOf() }
+        onTagRead: (String) -> Map<String, List<String>> = { mapOf() }
         //Todo: to generalize, it's possible we'll need to change the value in this pair to a List. That way something like language can have multiple
         //Todo: That, or order the language account for multiple keys.
-    ): Map<String, String> {
+    ): Map<String, List<String>> {
         parser.require(XmlPullParser.START_TAG, ns, startTag)
-        //We don't want anything in the top-most node, so we skip it for now.
-        val map = mutableMapOf<String,String>()
+        val map = mutableMapOf<String, List<String>>()
 
         tailrec fun helper(
             parser: XmlPullParser,
-            parsedElements: MutableMap<String, String> = mutableMapOf()
-        ): Map<String, String> {
-            //End case--we've reached the end tag and are ready to return.
+            parsedElements: MutableMap<String, List<String>> = mutableMapOf()
+        ): Map<String, List<String>> {
+
             if (parser.name == startTag && parser.eventType == XmlPullParser.END_TAG) {
                 return parsedElements.toMap()
             }
-
             //Skip at least once so that we don't need to handle the start tag in the lambda
             parser.next()
-
-            //Step case:
             if (parser.eventType == XmlPullParser.START_TAG) {
-//                parsedElements.putIfAbsent(parser.name, parsingEvents(parser.name))
-                //note the '+' operator allows the second map to override values of the first map.
-//              parsedElements + parsingEvents(parser.name)
-                parsedElements.putAll(onTagRead(parser.name))
+                parsedElements.mergeAll(onTagRead(parser.name))
             }
 
             return helper(parser, parsedElements)
         }
-        //We don't want anything from the top-most node.
-        //If we do end up wanting something, which could allow us to make text-reading an instance of this function, we might want to change this behavior
-        //We could also just move the nextTag in the helper block to happen before the step case, but that would make this decision less apparent.
-        parser.next()
-        return helper(parser,map)
+        return helper(parser, map)
+    }
+
+    private fun <A, B> MutableMap<A, List<B>>.mergeAll(map: Map<A, List<B>>) {
+        map.entries.forEach { entry ->
+            this.merge(entry.key, entry.value) { old, new ->
+                val coolList = mutableListOf<B>()
+                coolList.addAll(old)
+                coolList.addAll(new)
+                coolList.toList()
+            }
+        }
     }
 
     //Parses the contents of a teiHeader.
     @Throws(XmlPullParserException::class, IOException::class)
     private fun readHeader(parser: XmlPullParser): WorkHeader {
+        var languageUsed: Map<String, List<String>> = mapOf()
         val map = parserLoop(parser, TEIElement.TeiHeader.element) { tagInHeader ->
             //Todo: we can see that the current way of doing things duplicates a lot. Can we shorten this?
             when (tagInHeader) {
-                TEIFileDescription.FileDescription.element -> parserLoop(parser, tagInHeader) { tagInFileDesc ->
+                TEIFileDescription.FileDescription.element -> parserLoop(
+                    parser,
+                    tagInHeader
+                ) { tagInFileDesc ->
                     when (tagInFileDesc) {
-                        TEIFileDescription.TitleStatement.element -> parserLoop(parser, tagInFileDesc) { tagInTitleStatement ->
+                        TEIFileDescription.TitleStatement.element -> parserLoop(
+                            parser,
+                            tagInFileDesc
+                        ) { tagInTitleStatement ->
                             when (tagInTitleStatement) {
-                                TEIFileDescription.Title.element -> readTag(parser, tagInTitleStatement)
-                                TEIFileDescription.Author.element -> readTag(parser, tagInTitleStatement)
+                                TEIFileDescription.Title.element -> readTag(
+                                    parser,
+                                    tagInTitleStatement
+                                )
+                                TEIFileDescription.Author.element -> readTag(
+                                    parser,
+                                    tagInTitleStatement
+                                )
                                 else -> parser.skip(tagInTitleStatement)
                             }
                         }
                         else -> parser.skip(tagInFileDesc)
                     }
                 }
-                TEIFileDescription.ProfileDescription.element -> parserLoop(parser, tagInHeader) { tag ->
-                    when (tag) {
-                        //This fails, because language used can be a subset.
-//                        TEIFileDescription.LanguageUsed.element -> readTag(parser, tag)
-                        TEIFileDescription.LanguageUsed.element -> mapOf(Pair(tag,"LATIN BABEEE!"))
-                        else -> parser.skip(tag)
+                TEIFileDescription.ProfileDescription.element -> parserLoop(
+                    parser,
+                    tagInHeader
+                ) { tagInProfileDesc ->
+                    when (tagInProfileDesc) {
+                        TEIFileDescription.LanguagesUsed.element -> {
+                            languageUsed = parserLoop(
+                                parser,
+                                tagInProfileDesc
+                            ) { tagInLanguage ->
+                                when (tagInLanguage) {
+                                    TEIFileDescription.Language.element -> readTag(
+                                        parser,
+                                        tagInLanguage
+                                    )
+                                    else -> parser.skip(tagInLanguage)
+                                }
+                            }
+                            mapOf()
+                        }
+                        else -> parser.skip(tagInProfileDesc)
                     }
                 }
-                //Tags we don't care about should be skipped.
                 else -> parser.skip(tagInHeader)
             }
         }
-
         return WorkHeader(
-            title = map.getOrDefault(TEIFileDescription.Title.element, "Unknown Work"),
-            author = map.getOrDefault(TEIFileDescription.Author.element, "Unknown author"),
-            languagesUsed = listOf<String>("Unknown language")
+            title = map.getOrDefault(TEIFileDescription.Title.element, listOf("Unknown Work")).first(),
+            author = map.getOrDefault(TEIFileDescription.Author.element, listOf("Unknown author")).first(),
+            languagesUsed = languageUsed.getOrDefault(TEIFileDescription.Language.element, listOf("Unknown languages"))
         )
     }
 
@@ -161,7 +180,7 @@ class TEIParser() {
      * Side effects: Moves the parser into the tag body, reads, and then moves it to the tag close.
      */
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun readTag(parser: XmlPullParser, tag: String): Map<String, String> {
+    private fun readTag(parser: XmlPullParser, tag: String): Map<String, List<String>> {
         parser.require(XmlPullParser.START_TAG, ns, tag)
         val decodedString = readText(parser)
         parser.require(XmlPullParser.END_TAG, ns, tag)
@@ -188,13 +207,13 @@ class TEIParser() {
 
     // For the tags title and summary, extracts their text values.
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun readText(parser: XmlPullParser): String {
+    private fun readText(parser: XmlPullParser): List<String> {
         var result = ""
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.text
             parser.nextTag()
         }
-        return result
+        return listOf(result)
     }
 
 }

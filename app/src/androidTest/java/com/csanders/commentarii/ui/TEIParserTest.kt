@@ -26,14 +26,14 @@ class TEIParserTest {
     }
 
     @Test
-    fun apuleius_hasCorrectHeader() {
+    fun hasCorrectHeader() {
         val expectedHeader = WorkHeader(
             title = "Metamorphoses",
             author = "Apuleius",
-            languagesUsed = listOf("Greek", "Latin")
+            languagesUsed = listOf("English", "Greek", "Latin")
         )
         Assert.assertEquals(expectedHeader.title, header.title)
         Assert.assertEquals(expectedHeader.author, header.author)
-        Assert.assertEquals(expectedHeader.languagesUsed, header.languagesUsed)
+        Assert.assertEquals(expectedHeader.languagesUsed.toSortedSet(), header.languagesUsed.toSortedSet())
     }
 }

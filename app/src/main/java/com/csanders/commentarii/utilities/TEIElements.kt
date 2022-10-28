@@ -130,7 +130,7 @@ enum class TEIFileDescription(val element: String) {
 
     //Profile
     ProfileDescription("profileDesc"),
-    LanguageUsed("langUsage"),
+    LanguagesUsed("langUsage"),
     Language("language")
 
 }
