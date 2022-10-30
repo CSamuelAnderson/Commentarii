@@ -7,10 +7,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.csanders.commentarii.R
-import com.csanders.commentarii.utilities.TEIParser
+import com.csanders.commentarii.utilities.TEIHeaderParser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,8 +18,8 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
     //Todo: Eventually we'll want getText running in the background or something.
     @Composable
     fun getText(): AnnotatedString {
-        val parser = TEIParser()
-        val work = parser.parseFromResource(R.raw.apuleius_golden_ass_lat).last()
+        val parser = TEIHeaderParser()
+        val work = parser.getWorkFromResource(R.raw.apuleius_golden_ass_lat).last()
         return buildAnnotatedString {
             pushStyle(SpanStyle(fontSize = 24.sp))
             append(work.header.title)

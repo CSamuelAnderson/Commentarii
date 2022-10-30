@@ -3,14 +3,14 @@ package com.csanders.commentarii.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.WorkHeader
-import com.csanders.commentarii.utilities.TEIParser
+import com.csanders.commentarii.utilities.TEIHeaderParser
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class TEIParserTest {
-    lateinit var parser: TEIParser
+class TEIHeaderParserTest {
+    lateinit var parser: TEIHeaderParser
     lateinit var header: WorkHeader
 
     @get:Rule
@@ -18,10 +18,10 @@ class TEIParserTest {
 
     @Before
     fun setupWork() {
-        parser = TEIParser()
+        parser = TEIHeaderParser()
         composeTestRule.setContent {
             val goldenAssResource = R.raw.apuleius_golden_ass_lat
-            header = parser.parseFromResource(goldenAssResource).first().header
+            header = parser.getWorkFromResource(goldenAssResource).first().header
         }
     }
 
