@@ -7,7 +7,8 @@ package com.csanders.commentarii.datamodel
 data class Section(
     val text: String = "",
     val footnotes: MutableList<Footnote> = mutableListOf(),
-    val attributes: String = "",
-    val subsections: ArrayDeque<Section> = ArrayDeque()) {
+    val attributes: Map<String,String> = mapOf(),
+    val subsections: List<Section> = listOf()
+) {
 
 }

@@ -1,7 +1,5 @@
 package com.csanders.commentarii.utilities
 
-import kotlin.String
-
 //For now we only encode the TEI Lite package
 //Some of which is missing here:
 //Links
@@ -107,13 +105,11 @@ enum class TEIAttributes(val attribute: String) {
     //TODO: Encode anything post-interp
 
 
-
-
 }
 
 //Not all are encoded, just the ones relevant to this project
 enum class TEIHeader(val element: String) {
-   FileDescription("fileDesc"),
+    FileDescription("fileDesc"),
 
     //Title
     TitleStatement("titleStmt"),

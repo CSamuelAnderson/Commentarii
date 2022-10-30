@@ -65,8 +65,8 @@ class TEIWorkParser() {
                     when (tagInFileDesc) {
                         TEIHeader.TitleStatement.element -> parser.loop(tagInFileDesc) { tagInTitleStatement ->
                             when (tagInTitleStatement) {
-                                TEIHeader.Title.element -> parser.readTag(tagInTitleStatement)
-                                TEIHeader.Author.element -> parser.readTag(tagInTitleStatement)
+                                TEIHeader.Title.element -> parser.readNonNestedTagText(tagInTitleStatement)
+                                TEIHeader.Author.element -> parser.readNonNestedTagText(tagInTitleStatement)
                                 else -> parser.skip(tagInTitleStatement)
                             }
                         }
@@ -101,7 +101,7 @@ class TEIWorkParser() {
             when (tagInProfileDesc) {
                 TEIHeader.LanguagesUsed.element -> parser.loop(tagInProfileDesc) { tagInLanguage ->
                     when (tagInLanguage) {
-                        TEIHeader.Language.element -> parser.readTag(tagInLanguage)
+                        TEIHeader.Language.element -> parser.readNonNestedTagText(tagInLanguage)
                         else -> parser.skip(tagInLanguage)
                     }
                 }
@@ -112,4 +112,38 @@ class TEIWorkParser() {
     }
 
 
+    //Gets the high text. This
+    @Throws(XmlPullParserException::class, IOException::class)
+    private fun readTEIText(parser: XmlPullParser): Section {
+        parser.require(XmlPullParser.START_TAG, ns, TEIElement.Text.element)
+        val textAttributes = parser.readTagAttributes(TEIElement.Text.element)
+
+        //Todo: keep in mind .loop returns a Map. It isn't the right tool (right now) for also returning attributes, and building the expected nest.
+        val textOfWork = parser.loop(TEIElement.Text.element) { tagInText ->
+            when(tagInText) {
+                //Todo: basically this is just scaffolding for what we expect
+                TEIElement.FrontMatter.element -> parser.skip(tagInText)
+                TEIElement.TextBody.element -> parser.skip(tagInText)
+                TEIElement.BackMatter.element -> parser.skip(tagInText)
+                else -> parser.skip(tagInText)
+            }
+        }
+        return Section()
+    }
+
+    @Throws(XmlPullParserException::class, IOException::class)
+    private fun readBody(parser: XmlPullParser): Section {
+
+    }
+
+    @Throws(XmlPullParserException::class, IOException::class)
+    fun getSection(parser: XmlPullParser): Section {
+        val tag = TEIElement.Text.element
+        val attributes = parser.readTagAttributes(tag)
+        //This will crash. This assumes that the tag called is non-nested. This could still fail.
+        //Also, something like div doesn't even have text.
+        val text = parser.readNonNestedTagText(tag)
+        val subsection = getSection(parser)
+        return Section()
+    }
 }

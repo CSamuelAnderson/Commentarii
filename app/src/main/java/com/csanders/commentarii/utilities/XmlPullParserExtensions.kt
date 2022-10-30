@@ -1,5 +1,6 @@
 package com.csanders.commentarii.utilities
 
+import com.csanders.commentarii.datamodel.Section
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -7,7 +8,7 @@ import java.io.IOException
 //All in-line XmlPullParser functions + anything that should belong to parsing in general
 
 //todo: we may need to change this to the TEI namespace.
-private val ns: String? = null
+val ns: String? = null
 
 @Throws(XmlPullParserException::class, IOException::class)
 fun XmlPullParser.loop(
@@ -59,7 +60,7 @@ fun XmlPullParser.skip(tag: String): Map<String, List<String>> {
  * Side effects: Moves the parser into the tag body, reads, and then moves it to the tag close.
  */
 @Throws(IOException::class, XmlPullParserException::class)
-fun XmlPullParser.readTag(tag: String): Map<String, List<String>> {
+fun XmlPullParser.readNonNestedTagText(tag: String): Map<String, List<String>> {
     this.require(XmlPullParser.START_TAG, ns, tag)
     val decodedString = readText(this)
     this.require(XmlPullParser.END_TAG, ns, tag)
@@ -95,20 +96,48 @@ fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
     return helper()
 }
 
-// Processes link tags in the feed.
-//Todo: Google's example for using tags. We'll want to copy this and then discard later.
-//    @Throws(IOException::class, XmlPullParserException::class)
-//    private fun readLink(parser: XmlPullParser): String {
-//        var link = ""
-//        parser.require(XmlPullParser.START_TAG, ns, "link")
-//        val tag = parser.name
-//        val relType = parser.getAttributeValue(null, "rel")
-//        if (tag == "link") {
-//            if (relType == "alternate") {
-//                link = parser.getAttributeValue(null, "href")
-//                parser.nextTag()
-//            }
-//        }
-//        parser.require(XmlPullParser.END_TAG, ns, "link")
-//        return link
-//    }
+//Todo, having an overloaded function like this may be a little awkward to use.
+//  Also, texts occasionally have notes already inside of them. We should consider adding them to the annotated notes.
+@Throws(XmlPullParserException::class, IOException::class)
+fun XmlPullParser.loop(
+    startTag: String,
+    onTagRead: (tag: String) -> Section
+): Section {
+    this.require(XmlPullParser.START_TAG, ns, startTag)
+    val attributes = this.readTagAttributes(startTag)
+
+    tailrec fun loop(
+        parser: XmlPullParser,
+        //Todo: Consider StringBuilder in this instance?
+        parsedText: String = "",
+        parsedSections: MutableList<Section>  = mutableListOf(),
+    ): Pair<String, List<Section>> {
+
+        //End case: we've completed the current section and can return.
+        if (parser.name == startTag && parser.eventType == XmlPullParser.END_TAG) {
+            return parsedSections
+        }
+
+        //Todo: Add the available text into our text element, but don't assert that we've finished reading.
+        parser.next()
+
+        //We've reached the start of a new tag.
+        //The way we've set it up, we're expecting this new tag to be a Section
+        //but it could very well be a smaller attribute, like a note or a change in emphasis
+        //So maybe it isn't appropriate for onTagRead to return a lambda here.
+        //Todo: Right now, table-of-content level sections (chapters, books) and styling sections (italics, foreign words) will be saved in the same way.
+        //      This will make it difficult to create a table of contents or organize text styling
+        //      Maybe if we saved two lists: subsections (proper) and subsection (stylized)
+        if (parser.eventType == XmlPullParser.START_TAG) {
+            parsedSections.add(onTagRead(parser.name))
+        }
+
+        //in any case, we are now done with whatever part of the parser we're one, so we should move it.
+        parser.next()
+        //Now that we're on a new piece, start it over again.
+        return loop(parser, parsedText, parsedSections)
+    }
+    val parsedStuff = loop(this)
+
+    return Section(text = parsedStuff.first, )
+}
