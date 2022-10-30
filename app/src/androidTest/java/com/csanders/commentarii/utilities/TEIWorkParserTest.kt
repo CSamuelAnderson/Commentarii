@@ -1,16 +1,15 @@
-package com.csanders.commentarii.ui
+package com.csanders.commentarii.utilities
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.WorkHeader
-import com.csanders.commentarii.utilities.TEIHeaderParser
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class TEIHeaderParserTest {
-    lateinit var parser: TEIHeaderParser
+class TEIWorkParserTest {
+    lateinit var parser: TEIWorkParser
     lateinit var header: WorkHeader
 
     @get:Rule
@@ -18,7 +17,7 @@ class TEIHeaderParserTest {
 
     @Before
     fun setupWork() {
-        parser = TEIHeaderParser()
+        parser = TEIWorkParser()
         composeTestRule.setContent {
             val goldenAssResource = R.raw.apuleius_golden_ass_lat
             header = parser.getWorkFromResource(goldenAssResource).first().header
@@ -26,7 +25,7 @@ class TEIHeaderParserTest {
     }
 
     @Test
-    fun hasCorrectHeader() {
+    fun goldenAssHasCorrectHeader() {
         val expectedHeader = WorkHeader(
             title = "Metamorphoses",
             author = "Apuleius",
@@ -34,6 +33,10 @@ class TEIHeaderParserTest {
         )
         Assert.assertEquals(expectedHeader.title, header.title)
         Assert.assertEquals(expectedHeader.author, header.author)
-        Assert.assertEquals(expectedHeader.languagesUsed.toSortedSet(), header.languagesUsed.toSortedSet())
+        Assert.assertEquals(
+            expectedHeader.languagesUsed.toSortedSet(),
+            header.languagesUsed.toSortedSet()
+        )
     }
+
 }

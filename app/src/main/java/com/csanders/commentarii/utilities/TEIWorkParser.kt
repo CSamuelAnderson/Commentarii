@@ -13,7 +13,7 @@ import java.io.IOException
 import java.io.InputStream
 
 
-class TEIHeaderParser() {
+class TEIWorkParser() {
 
     //composable so we can grab the context
     @Composable
@@ -111,22 +111,5 @@ class TEIHeaderParser() {
         return languageUsed
     }
 
-    // Processes link tags in the feed.
-//Todo: Google's example for using tags. We'll want to copy this and then discard later.
-//    @Throws(IOException::class, XmlPullParserException::class)
-//    private fun readLink(parser: XmlPullParser): String {
-//        var link = ""
-//        parser.require(XmlPullParser.START_TAG, ns, "link")
-//        val tag = parser.name
-//        val relType = parser.getAttributeValue(null, "rel")
-//        if (tag == "link") {
-//            if (relType == "alternate") {
-//                link = parser.getAttributeValue(null, "href")
-//                parser.nextTag()
-//            }
-//        }
-//        parser.require(XmlPullParser.END_TAG, ns, "link")
-//        return link
-//    }
 
 }

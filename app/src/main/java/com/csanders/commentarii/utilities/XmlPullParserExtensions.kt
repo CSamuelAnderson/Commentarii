@@ -77,3 +77,38 @@ private fun readText(parser: XmlPullParser): List<String> {
     return listOf(result)
 }
 
+@Throws(IOException::class, XmlPullParserException::class)
+fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
+    this.require(XmlPullParser.START_TAG, ns, startTag)
+    val numOfAttributes = this.attributeCount
+
+    tailrec fun helper(attributeIndex: Int = 0, parsedAttributes: MutableMap<String, String> = mutableMapOf()): Map<String, String> {
+
+        if (attributeIndex > numOfAttributes - 1) {
+            return parsedAttributes.toMap()
+        }
+        parsedAttributes[this.getAttributeName(attributeIndex)] =
+            this.getAttributeValue(attributeIndex)
+
+        return helper(attributeIndex + 1, parsedAttributes)
+    }
+    return helper()
+}
+
+// Processes link tags in the feed.
+//Todo: Google's example for using tags. We'll want to copy this and then discard later.
+//    @Throws(IOException::class, XmlPullParserException::class)
+//    private fun readLink(parser: XmlPullParser): String {
+//        var link = ""
+//        parser.require(XmlPullParser.START_TAG, ns, "link")
+//        val tag = parser.name
+//        val relType = parser.getAttributeValue(null, "rel")
+//        if (tag == "link") {
+//            if (relType == "alternate") {
+//                link = parser.getAttributeValue(null, "href")
+//                parser.nextTag()
+//            }
+//        }
+//        parser.require(XmlPullParser.END_TAG, ns, "link")
+//        return link
+//    }
