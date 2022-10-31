@@ -83,7 +83,10 @@ fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
     this.require(XmlPullParser.START_TAG, ns, startTag)
     val numOfAttributes = this.attributeCount
 
-    tailrec fun helper(attributeIndex: Int = 0, parsedAttributes: MutableMap<String, String> = mutableMapOf()): Map<String, String> {
+    tailrec fun helper(
+        attributeIndex: Int = 0,
+        parsedAttributes: MutableMap<String, String> = mutableMapOf()
+    ): Map<String, String> {
 
         if (attributeIndex > numOfAttributes - 1) {
             return parsedAttributes.toMap()
@@ -96,8 +99,8 @@ fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
     return helper()
 }
 
-//Todo, having an overloaded function like this may be a little awkward to use.
-//  Also, texts occasionally have notes already inside of them. We should consider adding them to the annotated notes.
+//TODO: texts occasionally have notes already inside of them. We should consider adding them to the annotated notes.
+//  To do so probably involves changing the recursive .readSection call into a lambda.
 @Throws(XmlPullParserException::class, IOException::class)
 fun XmlPullParser.readSection(
     startTag: String,
@@ -111,7 +114,7 @@ fun XmlPullParser.readSection(
         parser: XmlPullParser,
         //Todo: Consider StringBuilder in this instance?
         parsedText: StringBuilder = StringBuilder(),
-        parsedSections: MutableList<Section>  = mutableListOf(),
+        parsedSections: MutableList<Section> = mutableListOf(),
     ): Pair<String, List<Section>> {
 
         //End case: we've completed the current section and can return.
@@ -122,21 +125,21 @@ fun XmlPullParser.readSection(
         //in any case, we are now done with whatever part of the parser we're one, so we should move it.
         parser.next()
 
-        if (parser.eventType == XmlPullParser.TEXT){
+        if (parser.eventType == XmlPullParser.TEXT && parser.text.isNotBlank()) {
             //Todo: Add the available text into our text element, but don't assert that we've finished reading.
             parsedText.append(parser.text)
         }
 
-        //all attributes will now be sections.
-        //This can overflow the stack oops.
+        //All attributes are sections.
+        //Since this isn't a call to the tailrec part of this section, this could overflow the stack if the XMl file has too many nested tags.
         if (parser.eventType == XmlPullParser.START_TAG) {
-//            parsedSections.add(onTagRead(parser.name))
             parsedSections.add(parser.readSection(parser.name))
         }
 
         //Now that we're on a new piece, start it over again.
         return loop(parser, parsedText, parsedSections)
     }
+
     val parsedStuff = loop(this)
 
     return Section(
