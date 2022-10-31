@@ -40,6 +40,7 @@ class TEIWorkParser() {
     //Requires parser set set on the TEI header.
     private fun readWork(parser: XmlPullParser): List<Work> {
         var header = WorkHeader()
+        var section = Section()
 
         parser.loop(TEIElement.TEI.element) { tag ->
             when (tag) {
@@ -47,10 +48,14 @@ class TEIWorkParser() {
                     header = readHeader(parser)
                     mapOf()
                 }
+                TEIElement.Text.element -> {
+                    section = parser.readSection(tag)
+                    mapOf()
+                }
                 else -> parser.skip(tag)
             }
         }
-        val work = Work(header, Section())
+        val work = Work(header, section)
         return listOf(work)
     }
 
@@ -65,8 +70,12 @@ class TEIWorkParser() {
                     when (tagInFileDesc) {
                         TEIHeader.TitleStatement.element -> parser.loop(tagInFileDesc) { tagInTitleStatement ->
                             when (tagInTitleStatement) {
-                                TEIHeader.Title.element -> parser.readNonNestedTagText(tagInTitleStatement)
-                                TEIHeader.Author.element -> parser.readNonNestedTagText(tagInTitleStatement)
+                                TEIHeader.Title.element -> parser.readNonNestedTagText(
+                                    tagInTitleStatement
+                                )
+                                TEIHeader.Author.element -> parser.readNonNestedTagText(
+                                    tagInTitleStatement
+                                )
                                 else -> parser.skip(tagInTitleStatement)
                             }
                         }
@@ -117,23 +126,27 @@ class TEIWorkParser() {
     private fun readTEIText(parser: XmlPullParser): Section {
         parser.require(XmlPullParser.START_TAG, ns, TEIElement.Text.element)
         val textAttributes = parser.readTagAttributes(TEIElement.Text.element)
+        var section = Section()
 
         //Todo: keep in mind .loop returns a Map. It isn't the right tool (right now) for also returning attributes, and building the expected nest.
         val textOfWork = parser.loop(TEIElement.Text.element) { tagInText ->
-            when(tagInText) {
+            when (tagInText) {
                 //Todo: basically this is just scaffolding for what we expect
                 TEIElement.FrontMatter.element -> parser.skip(tagInText)
-                TEIElement.TextBody.element -> parser.skip(tagInText)
                 TEIElement.BackMatter.element -> parser.skip(tagInText)
+                TEIElement.TextBody.element -> {
+                section = parser.readSection(tagInText)
+                mapOf()
+            }
                 else -> parser.skip(tagInText)
             }
         }
-        return Section()
+        return section
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
     private fun readBody(parser: XmlPullParser): Section {
-
+    return Section()
     }
 
     @Throws(XmlPullParserException::class, IOException::class)

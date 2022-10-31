@@ -99,45 +99,55 @@ fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
 //Todo, having an overloaded function like this may be a little awkward to use.
 //  Also, texts occasionally have notes already inside of them. We should consider adding them to the annotated notes.
 @Throws(XmlPullParserException::class, IOException::class)
-fun XmlPullParser.loop(
+fun XmlPullParser.readSection(
     startTag: String,
-    onTagRead: (tag: String) -> Section
 ): Section {
     this.require(XmlPullParser.START_TAG, ns, startTag)
+    val tag = this.name
+    val shouldBeInTOC = tagIsPartOfTOC(tag)
     val attributes = this.readTagAttributes(startTag)
 
     tailrec fun loop(
         parser: XmlPullParser,
         //Todo: Consider StringBuilder in this instance?
-        parsedText: String = "",
+        parsedText: StringBuilder = StringBuilder(),
         parsedSections: MutableList<Section>  = mutableListOf(),
     ): Pair<String, List<Section>> {
 
         //End case: we've completed the current section and can return.
         if (parser.name == startTag && parser.eventType == XmlPullParser.END_TAG) {
-            return parsedSections
-        }
-
-        //Todo: Add the available text into our text element, but don't assert that we've finished reading.
-        parser.next()
-
-        //We've reached the start of a new tag.
-        //The way we've set it up, we're expecting this new tag to be a Section
-        //but it could very well be a smaller attribute, like a note or a change in emphasis
-        //So maybe it isn't appropriate for onTagRead to return a lambda here.
-        //Todo: Right now, table-of-content level sections (chapters, books) and styling sections (italics, foreign words) will be saved in the same way.
-        //      This will make it difficult to create a table of contents or organize text styling
-        //      Maybe if we saved two lists: subsections (proper) and subsection (stylized)
-        if (parser.eventType == XmlPullParser.START_TAG) {
-            parsedSections.add(onTagRead(parser.name))
+            return Pair(parsedText.toString(), parsedSections.toList())
         }
 
         //in any case, we are now done with whatever part of the parser we're one, so we should move it.
         parser.next()
+
+        if (parser.eventType == XmlPullParser.TEXT){
+            //Todo: Add the available text into our text element, but don't assert that we've finished reading.
+            parsedText.append(parser.text)
+        }
+
+        //all attributes will now be sections.
+        //This can overflow the stack oops.
+        if (parser.eventType == XmlPullParser.START_TAG) {
+//            parsedSections.add(onTagRead(parser.name))
+            parsedSections.add(parser.readSection(parser.name))
+        }
+
         //Now that we're on a new piece, start it over again.
         return loop(parser, parsedText, parsedSections)
     }
     val parsedStuff = loop(this)
 
-    return Section(text = parsedStuff.first, )
+    return Section(
+        tag = tag,
+        text = parsedStuff.first,
+        attributes = attributes,
+        shouldBeInTOC = shouldBeInTOC,
+        subsections = parsedStuff.second
+    )
+}
+
+fun tagIsPartOfTOC(tag: String): Boolean {
+    return true
 }

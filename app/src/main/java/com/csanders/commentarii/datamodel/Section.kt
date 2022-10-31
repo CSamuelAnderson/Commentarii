@@ -6,9 +6,11 @@ package com.csanders.commentarii.datamodel
 
 data class Section(
     val text: String = "",
+    val tag: String = "",
     val footnotes: MutableList<Footnote> = mutableListOf(),
     val attributes: Map<String,String> = mapOf(),
-    val subsections: List<Section> = listOf()
+    val subsections: List<Section> = listOf(),
+    val shouldBeInTOC: Boolean = true
 ) {
 
 }
