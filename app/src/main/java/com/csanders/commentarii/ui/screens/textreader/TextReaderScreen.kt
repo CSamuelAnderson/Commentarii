@@ -2,7 +2,11 @@ package com.csanders.commentarii.ui.screens.textreader
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,8 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
-
-    val textStyle = MaterialTheme.typography.bodyMedium
+    val scrollState = rememberScrollState()
     //Columns do not recompose on their own
     //Wrap or move all state into a new area.
     Box(
@@ -35,12 +38,18 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
         SelectionContainer(
             modifier = Modifier
 //                .fillMaxWidth()
-                .fillMaxSize()
+                .fillMaxSize().scrollable(scrollState, Orientation.Vertical)
         ) {
-            Text(
+            //Todo: lazy columns can have bad performance
+            LazyColumn() {
+                item {
+                    Text(
 //                modifier = Modifier.fillMaxSize(),
-                text = viewModel.getText(),
-            )
+                        text = viewModel.getText(),
+                    )
+                }
+            }
+
         }
         TurnPageBanner(
             modifier = Modifier
@@ -93,8 +102,8 @@ private fun TurnPageButton(
             Toast.makeText(contextForToast, "TODO: Navigate!", Toast.LENGTH_SHORT)
                 .show()
         },
-        text = {Text(text = nextPassageName, style = TextStyle(fontSize = 16.sp))},
-        icon = {Icon(imageVector = iconImageVector, contentDescription = contentDescription)}
+        text = { Text(text = nextPassageName, style = TextStyle(fontSize = 16.sp)) },
+        icon = { Icon(imageVector = iconImageVector, contentDescription = contentDescription) }
     )
 }
 

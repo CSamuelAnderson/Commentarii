@@ -127,7 +127,7 @@ fun XmlPullParser.readSection(
 
         if (parser.eventType == XmlPullParser.TEXT && parser.text.isNotBlank()) {
             //Todo: Add the available text into our text element, but don't assert that we've finished reading.
-            parsedText.append(parser.text)
+            parsedText.append(parser.text.trim('\n'))
         }
 
         //All attributes are sections.
