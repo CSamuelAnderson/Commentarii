@@ -4,7 +4,7 @@ import com.csanders.commentarii.datamodel.ParsedXml
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
-//TODO: One day we'll create a wonderful ParsedXml generator, but for now we'll just use example cases
+//TODO: One day we'll create a wonderful ParsedXml generator, but for now we'll just the nasty example in front of you
 internal class WorkConverterTest : StringSpec({
 
     "Converts correct Header" {

@@ -21,7 +21,7 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
     @Composable
     fun getText(): AnnotatedString {
         val parser = TEIWorkParser()
-        val work = parser.getWorkFromResource(R.raw.apuleius_golden_ass_lat).last()
+        val work = parser.getWorkFromResource(R.raw.apuleius_golden_ass_lat)
         return buildAnnotatedString {
             pushStyle(SpanStyle(fontSize = 24.sp))
             append(work.header.title)
