@@ -8,12 +8,13 @@ data class ParsedXml(
     //  We should probably make text a subclass here OR make this class more clear on how it handles this stuff.
     val text: String = "",
     val subXml: List<ParsedXml> = listOf()
-)
+) {
 
-fun ParsedXml.findTag(tagToFind: String): ParsedXml {
-    return this.subXml.find { it.tag == tagToFind } ?: ParsedXml()
-}
+    fun findTag(tagToFind: String): ParsedXml {
+        return this.subXml.find { it.tag == tagToFind } ?: ParsedXml()
+    }
 
-fun ParsedXml.getFirstText(): String? {
-    return this.subXml.find { it.text.isNotBlank() }?.text
+    fun getFirstText(): String? {
+        return this.subXml.find { it.text.isNotBlank() }?.text
+    }
 }
