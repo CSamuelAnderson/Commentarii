@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.Section
-import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.utilities.TEIWorkParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -31,12 +30,12 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
             append("\n")
             append(work.header.languagesUsed.first())
             append("\n\n")
-            append(blobAllTextTogether(work.body))
+            append(blobAllTextTogether(work.text))
             toAnnotatedString()
         }
     }
 
-    fun blobAllTextTogether(section: Section): String {
+    private fun blobAllTextTogether(section: Section): String {
 
         tailrec fun helpBlob(acc: StringBuilder, stack: List<Section>): String {
             //If the stack is empty, then we are done.
