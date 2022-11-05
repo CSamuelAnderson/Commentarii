@@ -11,8 +11,11 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,11 +26,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.Work
+import com.csanders.commentarii.datamodel.WorkHeader
 
 
 @Composable
 fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
+
+    //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
+    var work by remember { mutableStateOf(Work(WorkHeader(), Section())) }
+    work = viewModel.getWork()
+    var toc by remember { mutableStateOf(viewModel.getTOC(work)) }
+
+    var currentSection by remember { mutableStateOf(toc.first()) }
+
+    val contextForToast = LocalContext.current.applicationContext
+
+    //Todo; allow previous navigation
+    fun onPreviousSectionRequested() {
+        Toast.makeText(contextForToast, "Todo: allow for previous navigation!!", Toast.LENGTH_SHORT)
+            .show()
+    }
+
+    //Todo: lol this is a funny way of doing it but it should work for now
+    fun onNextSectionRequested() {
+        toc = toc.reversed().dropLast(1).reversed()
+        currentSection = toc.first()
+    }
+
     //Columns do not recompose on their own
     //Wrap or move all state into a new area.
     Box(
@@ -38,14 +66,20 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
         SelectionContainer(
             modifier = Modifier
 //                .fillMaxWidth()
-                .fillMaxSize().scrollable(scrollState, Orientation.Vertical)
+                .fillMaxSize()
+                .scrollable(scrollState, Orientation.Vertical)
         ) {
             //Todo: lazy columns can have bad performance
             LazyColumn() {
                 item {
                     Text(
 //                modifier = Modifier.fillMaxSize(),
-                        text = viewModel.getText(),
+                        text = viewModel.displayTitle(work),
+                    )
+                }
+                item {
+                    Text(
+                        text = viewModel.displaySection(currentSection)
                     )
                 }
             }
@@ -55,14 +89,18 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(30.dp)
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomCenter),
+            leftButtonTapped = ::onPreviousSectionRequested,
+            rightButtonTapped = ::onNextSectionRequested
         )
     }
 }
 
 @Composable
 private fun TurnPageBanner(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    leftButtonTapped: () -> Unit,
+    rightButtonTapped: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -72,13 +110,15 @@ private fun TurnPageBanner(
             modifier = Modifier.fillMaxWidth(0.5f),
             nextPassageName = "Previous Passage",
             iconImageVector = Icons.Default.ArrowBack,
-            contentDescription = "Button to load previous passage"
+            contentDescription = "Button to load previous passage",
+            onButtonTapped = leftButtonTapped
         )
         TurnPageButton(
             modifier = Modifier.fillMaxWidth(),
             nextPassageName = "Next Passage",
             iconImageVector = Icons.Default.ArrowForward,
-            contentDescription = "Button to load net passage"
+            contentDescription = "Button to load next passage",
+            onButtonTapped = rightButtonTapped
         )
     }
 }
@@ -86,36 +126,23 @@ private fun TurnPageBanner(
 @Composable
 private fun TurnPageButton(
     modifier: Modifier = Modifier,
-    onButtonTapped: () -> Unit = {},
+    onButtonTapped: () -> Unit,
     nextPassageName: String,
     iconImageVector: ImageVector,
     contentDescription: String
 ) {
-    val contextForToast = LocalContext.current.applicationContext
     ExtendedFloatingActionButton(
         modifier = modifier
             .background(Color.Transparent)
             .fillMaxHeight()
             .fillMaxWidth(0.3f),
         onClick = {
-            onButtonTapped
-            Toast.makeText(contextForToast, "TODO: Navigate!", Toast.LENGTH_SHORT)
-                .show()
+            onButtonTapped()
         },
         text = { Text(text = nextPassageName, style = TextStyle(fontSize = 16.sp)) },
         icon = { Icon(imageVector = iconImageVector, contentDescription = contentDescription) }
     )
 }
-
-private enum class TurnPage {
-    Forward, Backward
-}
-
-//@Preview
-//@Composable
-//fun PreviewChangeTextButton() {
-//  Turn
-//}
 
 @Preview
 @Composable

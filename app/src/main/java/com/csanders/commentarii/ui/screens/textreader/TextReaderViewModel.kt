@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.utilities.TEIWorkParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,11 +17,22 @@ import javax.inject.Inject
 class TextReaderViewModel @Inject constructor() : ViewModel() {
     val semanticName = "text reader screen"
 
+    @Composable
+    fun getWork(): Work {
+        val parser = TEIWorkParser()
+        return parser.getWorkFromResource(R.raw.plato_symposium_grc)
+    }
+
     //Todo: Eventually we'll want getText running in the background or something.
     @Composable
-    fun getText(): AnnotatedString {
-        val parser = TEIWorkParser()
-        val work = parser.getWorkFromResource(R.raw.apuleius_golden_ass_lat)
+    fun displaySection(section: Section): AnnotatedString {
+        return buildAnnotatedString {
+            append(blobAllTextTogether(section))
+        }
+    }
+
+    @Composable
+    fun displayTitle(work: Work): AnnotatedString {
         return buildAnnotatedString {
             pushStyle(SpanStyle(fontSize = 24.sp))
             append(work.header.title)
@@ -28,24 +40,34 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
             append("\n")
             append(work.header.author)
             append("\n")
-            append(work.header.languagesUsed.first())
-            append("\n\n")
-            append(blobAllTextTogether(work.text))
-            toAnnotatedString()
+            append(work.header.languagesUsed.joinToString(", "))
         }
+    }
+
+    fun getTOC(work: Work): List<Section> {
+        //function that returns the subsections of all subsections which do not have text
+        //does not search at depth.
+        return flattenTree(work.text)
+    }
+
+    private fun flattenTree(section: Section): List<Section> {
+        return listOf(section) + section.subsections.filter { it.text.isEmpty() }
+            .flatMap { subsection ->
+                flattenTree(subsection)
+            }
     }
 
     private fun blobAllTextTogether(section: Section): String {
 
         tailrec fun helpBlob(acc: StringBuilder, stack: List<Section>): String {
             //If the stack is empty, then we are done.
-            if(stack.isEmpty()) {
+            if (stack.isEmpty()) {
                 return acc.toString()
             }
 
             //If it isn't, then add the current section's text to our accumulator
             val subsection = stack.last()
-            if(subsection.text.isNotBlank()){
+            if (subsection.text.isNotBlank()) {
                 acc.append(subsection.text)
             }
 

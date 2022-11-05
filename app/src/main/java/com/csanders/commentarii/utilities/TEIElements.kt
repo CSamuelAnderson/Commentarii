@@ -3,7 +3,6 @@ package com.csanders.commentarii.utilities
 //For now we only encode the TEI Lite package
 //Some of which is missing here:
 //Links
-//TODo: We'll probably want the Encoding description somewhere
 //TODO: Some of the attributes should be re-organized so that elements are not in it.
 
 //Part of the TEI Lite package. See https://tei-c.org/release/doc/tei-p5-exemplars/pdf/tei_lite.doc.pdf
@@ -22,8 +21,8 @@ enum class TEIElement(val element: String) {
     BackMatter("back"),
 
     //Text division elements
+    Div("div"), //Divs may be further defined by other tags, and may also nest within other divs.
     Paragraph("p"),
-    Div("div"), //Divs may be further defined, by other tags, and may also nest within other divs.
     Heading("head"),
     Trailer("trailer"),
 
@@ -46,6 +45,7 @@ enum class TEIAttributes(val attribute: String) {
     //Overall
     XmlID("xml:id"),
     ReferenceNumber("n"),
+    Responsibility("resp"), //Encodes which person or body is responsible for the formatting, e.g. Perseus
     Language("xml:lang"),
 
     //Emphatics and rendering
@@ -87,6 +87,7 @@ enum class TEIAttributes(val attribute: String) {
     ReferenceString("rs"),
     Name("name"),
     Type("type"),
+    Subtype("subtype"),
     Index("index"),
     Date("date"), //Uses when=to offer a specific time
     When("when"),

@@ -67,27 +67,20 @@ private fun convertToSection(parsedXml: ParsedXml): Section {
     //      styling, like whether something should be a Header, italicized, etc.
 
     tailrec fun getSubsections(acc: List<Section> = listOf(), remainder: List<ParsedXml>): List<Section>{
-        //If we have no more Xml to parse, return the stack
         if (remainder.isEmpty()) {
             return acc
         }
-        //If it isn't, then pop off the first thing we still have
         val subSection = remainder.first()
 
-        //the subsection might have its own subsections to worry about
         //Note this is actual recursion, not tailrec
         if(subSection.subXml.isNotEmpty()) {
             return getSubsections(acc + convertToSection(subSection), remainder.drop(1))
         }
-        //If there is no subXml, it could be a text node. If so, save it to our accumulator
         else if(subSection.text.isNotBlank()) {
             return getSubsections(acc + Section(text = subSection.text), remainder.drop(1))
         }
-        //we've finished with this subsection, so drop it off and go again
         return getSubsections(acc, remainder.drop(1))
 
-        //End result: a list of subsections, where either the subsection was populated again using this method
-        //or the subsection is just empty text
     }
 
     val subsections = getSubsections(listOf(), parsedXml.subXml)
