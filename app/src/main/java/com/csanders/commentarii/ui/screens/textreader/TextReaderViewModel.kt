@@ -50,6 +50,7 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
         return flattenTree(work.text)
     }
 
+    //Probably should be a tailrec call
     private fun flattenTree(section: Section): List<Section> {
         return listOf(section) + section.subsections.filter { it.text.isEmpty() }
             .flatMap { subsection ->

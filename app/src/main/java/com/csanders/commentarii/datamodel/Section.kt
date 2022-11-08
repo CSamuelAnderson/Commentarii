@@ -1,8 +1,7 @@
 package com.csanders.commentarii.datamodel
 
-//We want to keep the lines of actual text separate from the body of the work.
-//Because we're allowing the app user to make changes via footnotes.
-//In other words, The Work's structure is read-only, while the structure of the work is read-write
+//TODO: It feels awkward that in the domain this ends up being either a header to a new section, or text, but not both.
+//  Should probably be two or more classes
 
 data class Section(
     val text: String = "",

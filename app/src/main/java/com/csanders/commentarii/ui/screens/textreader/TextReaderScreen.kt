@@ -38,22 +38,49 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
     var work by remember { mutableStateOf(Work(WorkHeader(), Section())) }
     work = viewModel.getWork()
-    var toc by remember { mutableStateOf(viewModel.getTOC(work)) }
+    val toc by remember { mutableStateOf(viewModel.getTOC(work)) }
 
-    var currentSection by remember { mutableStateOf(toc.first()) }
+    var forwardPages by remember { mutableStateOf(toc.reversed()) }
+    var backPages by remember { mutableStateOf(listOf<Section>()) }
+
+    var currentSection by remember { mutableStateOf(forwardPages.last()) }
 
     val contextForToast = LocalContext.current.applicationContext
 
-    //Todo; allow previous navigation
+    //Todo: obviously this could use some refactoring
     fun onPreviousSectionRequested() {
-        Toast.makeText(contextForToast, "Todo: allow for previous navigation!!", Toast.LENGTH_SHORT)
-            .show()
+        when (backPages.isEmpty()) {
+            true -> Toast.makeText(
+                contextForToast,
+                "all out of pages!",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+            false -> {
+                //todo: this is creating a new list every time, which is inefficient.
+                //  Since we don't want to mix mutable state and mutable list, we should make the Joy of Kotlin linked list or borrow from Arrow
+                forwardPages += currentSection
+                currentSection = backPages.last()
+                backPages = backPages.dropLast(1)
+            }
+        }
     }
 
-    //Todo: lol this is a funny way of doing it but it should work for now
     fun onNextSectionRequested() {
-        toc = toc.reversed().dropLast(1).reversed()
-        currentSection = toc.first()
+        when (forwardPages.isEmpty()) {
+            true -> Toast.makeText(
+                contextForToast,
+                "all out of pages!",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+            false -> {
+                backPages += currentSection
+                currentSection = forwardPages.last()
+                forwardPages = forwardPages.dropLast(1)
+            }
+        }
+
     }
 
     //Columns do not recompose on their own
@@ -65,7 +92,6 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     ) {
         SelectionContainer(
             modifier = Modifier
-//                .fillMaxWidth()
                 .fillMaxSize()
                 .scrollable(scrollState, Orientation.Vertical)
         ) {
@@ -73,13 +99,13 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
             LazyColumn() {
                 item {
                     Text(
-//                modifier = Modifier.fillMaxSize(),
                         text = viewModel.displayTitle(work),
                     )
                 }
                 item {
                     Text(
-                        text = viewModel.displaySection(currentSection)
+                        text = viewModel.displaySection(currentSection),
+                        modifier = Modifier.padding(horizontal = 3.dp)
                     )
                 }
             }
