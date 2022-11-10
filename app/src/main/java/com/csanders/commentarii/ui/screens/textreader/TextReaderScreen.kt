@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.Section2
 import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.datamodel.WorkHeader
 
@@ -36,12 +37,12 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
 
     //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
-    var work by remember { mutableStateOf(Work(WorkHeader(), Section())) }
+    var work by remember { mutableStateOf(Work(WorkHeader(), listOf(Section2()))) }
     work = viewModel.getWork()
     val toc by remember { mutableStateOf(viewModel.getTOC(work)) }
 
     var forwardPages by remember { mutableStateOf(toc.reversed()) }
-    var backPages by remember { mutableStateOf(listOf<Section>()) }
+    var backPages by remember { mutableStateOf(listOf<Section2>()) }
 
     var currentSection by remember { mutableStateOf(forwardPages.last()) }
 

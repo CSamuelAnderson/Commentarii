@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.Section2
 import com.csanders.commentarii.datamodel.Work
 import com.csanders.commentarii.utilities.TEIWorkParser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,10 +26,8 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
 
     //Todo: Eventually we'll want getText running in the background or something.
     @Composable
-    fun displaySection(section: Section): AnnotatedString {
-        return buildAnnotatedString {
-            append(blobAllTextTogether(section))
-        }
+    fun displaySection(section: Section2): AnnotatedString {
+        return section.printedString
     }
 
     @Composable
@@ -44,10 +43,19 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun getTOC(work: Work): List<Section> {
-        //function that returns the subsections of all subsections which do not have text
-        //does not search at depth.
-        return flattenTree(work.text)
+    //Todo: we'll want to make Lists of sections their own class to improve readability and to avoid having to do this weird logic here
+    fun getTOC(work: Work): List<Section2> {
+        return work.text.fold(listOf(Section2())) { acc, section2 ->
+            when (section2.isStartOfMajorSection) {
+                true -> acc + section2
+                false -> {
+                    val changedString = acc.last().printedString + section2.printedString
+                    val changedSection = Section2(changedString, acc.last().isStartOfMajorSection, acc.last().footnotes)
+                    acc.dropLast(1)  + changedSection
+                }
+            }
+        }
+
     }
 
     //Probably should be a tailrec call
