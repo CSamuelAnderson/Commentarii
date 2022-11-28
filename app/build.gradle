@@ -106,8 +106,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 
-    // Mockk dependencies
-    testImplementation "io.mockk:mockk:$mockk_version"
+    // Arrow
+    implementation("io.arrow-kt:arrow-core:1.1.2")
 }
 
 // Allow references to generated code

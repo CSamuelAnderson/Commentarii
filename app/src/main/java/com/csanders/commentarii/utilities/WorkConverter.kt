@@ -2,9 +2,11 @@ package com.csanders.commentarii.utilities
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import com.csanders.commentarii.datamodel.*
+import com.csanders.commentarii.ui.theme.Typography
 
 /**
  * Converts ParsedXml into a Work data class.
@@ -23,7 +25,7 @@ fun convertToWork(parsedXml: ParsedXml): Work {
         .findTag(TEIElement.Text.element)
         .findTag(TEIElement.TextBody.element)
 //    val body = convertToStupidSection(bodyTag)
-    val body = convertToSection(parsedXml = bodyTag)
+    val body = convertToOldSection(parsedXml = bodyTag)
     return Work(header, body)
 }
 
@@ -63,51 +65,71 @@ private fun getHeader(parsedXml: ParsedXml): WorkHeader {
     )
 }
 
-private fun convertToStupidSection(parsedXml: ParsedXml): Section {
+private fun ParsedXml.convertToChapters(): Chapters {
 
-    //Todo: We'll later use attributes and tag names to set other properties in the section
-    //      Such as :
-    //      the table of contents names/whether a section should be in the TOC
-    //      styling, like whether something should be a Header, italicized, etc.
-
-    tailrec fun getSubsections(
-        acc: List<Section> = listOf(),
-        remainder: List<ParsedXml>
-    ): List<Section> {
-        if (remainder.isEmpty()) {
-            return acc
+    fun ParsedXml.convertSubXmlToChapters(
+        pages: List<Chapter> = listOf(),
+        accPage: Chapter
+    ): List<Chapter> {
+        val addSection = addSection(Typography.bodyMedium) //Partially applied based on the current section's idk what I'm doing I'm fiddling around lol
+        return this.subXml.flatMap { child ->
+            when (child.shouldPageBreak()) {
+                true -> {
+                    convertSubXmlToChapters(
+                        pages + accPage,
+                        Chapter(child.getChapterHeading(), listOf())
+                    )
+                }
+                false -> {
+                    convertSubXmlToChapters(pages, addSection(accPage)(child.text))
+                }
+            }
         }
-        val subSection = remainder.first()
-
-        //Note this is actual recursion, not tailrec
-        if (subSection.subXml.isNotEmpty()) {
-            return getSubsections(acc + convertToStupidSection(subSection), remainder.drop(1))
-        } else if (subSection.text.isNotBlank()) {
-            return getSubsections(acc + Section(text = subSection.text), remainder.drop(1))
-        }
-        return getSubsections(acc, remainder.drop(1))
-
     }
 
-    val subsections = getSubsections(listOf(), parsedXml.subXml)
-
-    return Section(
-        subsections = subsections
-    ) //TODO: Take until we actually handle incremental loading
+    val allChapters =
+        this.convertSubXmlToChapters(accPage = Chapter(this.getChapterHeading(), listOf()))
+    return Chapters(
+        openedChapter = allChapters.first(),
+        previousChapters = listOf(),
+        futureChapters = allChapters.drop(1)
+    )
 }
 
-private fun convertToSection(
+private fun addSection(styling: TextStyle): (Chapter) -> (String) -> Chapter {
+    return { chapter ->
+        { sectionString ->
+            Chapter(chapter.chapterHeading, chapter.Texts + Passage(sectionString, styling))
+        }
+    }
+}
+
+private fun ParsedXml.getChapterHeading(): ChapterHeading {
+    val attributeHeader = this.attributes.getOrDefault(
+        TEIAttributes.Type.attribute, ""
+    ) + " " + this.attributes.getOrDefault(
+        TEIAttributes.Subtype.attribute, ""
+    ) + " " + this.attributes.getOrDefault(TEIAttributes.ReferenceNumber.attribute, "")
+    return when (attributeHeader.isBlank()) {
+        true -> ChapterHeading("New Chapter!")
+        false -> ChapterHeading(attributeHeader)
+    }
+}
+
+
+private fun ParsedXml.shouldPageBreak(): Boolean {
+    return this.tag == TEIElement.Div.element
+}
+
+//TODO: We'll need to create a refreshSectionAnnotations to manage a change in font, footnote?.
+private fun convertToOldSection(
     parentAnnotation: AnnotatedString = buildAnnotatedString {},
     parsedXml: ParsedXml
 ): List<Section2> {
 
     val topLevelAnnotation: AnnotatedString = parentAnnotation + buildTopLevelAnnotation(parsedXml)
-
-    //Generates whatever annotation should be set at the top.
-    //e.g. 'italics' will make everything following italicized
     val inheritedAnnotation: AnnotatedString =
         parentAnnotation + buildInheritedAnnotation(parsedXml)
-
 
     return listOf(
         Section2(
@@ -115,7 +137,7 @@ private fun convertToSection(
             isMajorSection(parsedXml)
         )
     ) + parsedXml.subXml.flatMap { child ->
-        convertToSection(inheritedAnnotation, child)
+        convertToOldSection(inheritedAnnotation, child)
     }
 }
 
@@ -135,10 +157,10 @@ private fun buildTopLevelAnnotation(parsedXml: ParsedXml): AnnotatedString {
                 TEIAttributes.Subtype.attribute,
                 ""
             ) + " " + parsedXml.attributes.getOrDefault(TEIAttributes.ReferenceNumber.attribute, "")
-           val chapterHeading = when(attributeHeader.isEmpty()) {
-               true -> "New chapter!"
-               false -> attributeHeader
-           } + "\n"
+            val chapterHeading = when (attributeHeader.isEmpty()) {
+                true -> "New chapter!"
+                false -> attributeHeader
+            } + "\n"
             append(chapterHeading)
         }
         if (parsedXml.text.isNotBlank()) {

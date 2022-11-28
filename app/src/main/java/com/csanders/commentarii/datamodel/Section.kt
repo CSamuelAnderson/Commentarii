@@ -4,11 +4,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 
 
-data class Section(
-    val text: String = "",
-    val footnotes: MutableList<Footnote> = mutableListOf(),
-    val subsections: List<Section> = listOf(),
-)
+//data class Section(
+//    val text: String = "",
+//    val footnotes: MutableList<Footnote> = mutableListOf(),
+//    val subsections: List<Section> = listOf(),
+//)
 
 /**
  * New section. aims to resolve the following issues:
@@ -20,5 +20,5 @@ data class Section(
 data class Section2(
     val printedString: AnnotatedString = buildAnnotatedString {},
     val isStartOfMajorSection: Boolean = false,
-    val footnotes: MutableList<Footnote> = mutableListOf()
+//    val footnotes: MutableList<Footnote> = mutableListOf()
 )
