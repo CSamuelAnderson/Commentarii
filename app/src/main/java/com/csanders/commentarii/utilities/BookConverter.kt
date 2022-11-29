@@ -28,7 +28,7 @@ fun convertToBook(parsedXml: ParsedXml): Book {
 
 //    val body = convertToStupidSection(bodyTag)
 //    return Work(header, body)
-    return Book(chapters = chapters, header = header)
+    return Book(pages = chapters, header = header)
 }
 
 /**
@@ -66,7 +66,7 @@ private fun ParsedXml.convertToHeader(): Header {
 //Todo: This is complicated enough to need documentation
 //  also, one result here that isn't easy to see is that ParsedXml with no text will still add a new passage.
 //  This will probably be handled better when we change up the type system for ParsedXml, but it's unintuitive and unnecessary.
-private fun ParsedXml.convertToChapters(): Chapters {
+private fun ParsedXml.convertToChapters(): Pages {
 
     val addSectionWithMediumBody =
         addPassage(Typography.bodyMedium) //Playing around with partial applications, just right now we're just being fancy
@@ -106,10 +106,10 @@ private fun ParsedXml.convertToChapters(): Chapters {
             stackOfXml = this.subXml.reversed().toMutableList(),
             accChapter = Chapter(this.getChapterHeading(), listOf())
         )
-    return Chapters(
-        openedChapter = allChapters.first(),
-        previousChapters = listOf(),
-        futureChapters = allChapters.drop(1)
+    return Pages(
+        openedPage = allChapters.first(),
+        previousPages = listOf(),
+        futurePages = allChapters.drop(1).reversed()
     )
 }
 

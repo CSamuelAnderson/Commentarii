@@ -1,7 +1,6 @@
 package com.csanders.commentarii.ui.shared
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -9,8 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.csanders.commentarii.ui.screens.textreader.TextReaderScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

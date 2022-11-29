@@ -35,7 +35,7 @@ internal class WorkConverterTest : StringSpec({
 
 fun Book.gatherAllTexts(): List<String> {
     val allChapters =
-        this.chapters.previousChapters + this.chapters.openedChapter + this.chapters.futureChapters
+        this.pages.previousPages + this.pages.openedPage + this.pages.futurePages.reversed()
     return allChapters.flatMap { chapter ->
         chapter.passages.map { it.text }
     }

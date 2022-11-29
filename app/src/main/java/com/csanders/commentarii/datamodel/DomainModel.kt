@@ -40,8 +40,15 @@ data class Book(
     //TODO: Should be replaced with the ID later
     //No table of content for now
 //    val tableOfContentsId: TableOfContents,
-    val chapters: Chapters,
+    val pages: Pages,
     val header: Header
+)
+
+//The Header is whatever information we grab from the Xml file but isn't in the body of the text itself.
+data class Header(
+    val title: Title,
+    val author: Author,
+    val languagesUsed: List<Language>
 )
 
 //Todo: eventually add a restricted setter to avoid making too long a name
@@ -54,43 +61,47 @@ value class Language(val language: String)
 @JvmInline
 value class Title(val title: String)
 
-data class Header(
-    val title: Title,
-    val author: Author,
-    val languagesUsed: List<Language>
-)
-
 //Todo: Eventually, we'll want to make these generate automatically
-data class BookId(val id: Int)
+data class BookId(val id: BunkID)
 
 //Refers to the currently opened page, and can be moved back and forth between chapters
 //Eventually, we'll want to make a LinkedList data structure so that we don't create new lists every page turn
 //Should be IDs after this.
 //Todo: Open/Closed and previous/future is a property of all pages, not just chapters.
-data class Chapters(
-    val ChaptersID: BunkID = -1,
-    val openedChapter: Chapter,
-    val previousChapters: List<Chapter>,
-    val futureChapters: List<Chapter>,
+data class Pages(
+    val pagesID: BunkID = -1,
+    val openedPage: Page,
+    val previousPages: List<Page>,
+    val futurePages: List<Page>,
 )
 
-//A page is something you can open to.
+/** A page represents any unit of text that should be displayed at a single time
+ */
 sealed class Page(
+    val id: BunkID,
     val passages: List<Passage>,
-    val id: BunkID
 )
 
-class TableOfContents(passages: List<Passage>, id: BunkID = -1) : Page(passages, id)
+class TableOfContents(passages: List<Passage>, id: BunkID = -1) : Page(id, passages)
 class Chapter(val chapterHeading: ChapterHeading, passages: List<Passage>, id: BunkID = -1) :
-    Page(passages, id)
+    Page(id, passages)
 
 //Todo: Styling will eventually need its own class, since we want the user to be able to configure it, we don't want to save TextStyle right away
+/**
+ * A section is a piece of text alongside the styling to be used when displaying it.
+ */
 sealed class Section(
     val styling: TextStyle,
     val text: String
 )
 
 class ChapterHeading(text: String) : Section(Typography.titleMedium, text)
+
+
+class Passage(text: String, styling: TextStyle = Typography.bodyMedium) :
+    Section(styling, text)
+
+
 
 /**
  * Ok, let me back up: what are the domain rules for adding marginalia (highlighting, vocab, footnote)?
@@ -102,9 +113,7 @@ class ChapterHeading(text: String) : Section(Typography.titleMedium, text)
  *
  */
 
-
-class Passage(text: String, styling: TextStyle = Typography.bodyMedium) :
-    Section(styling, text)
+sealed class Marginalia
 
 /**
  * setting up an Undefined type so we can continue to model without knowing the guts of the types.

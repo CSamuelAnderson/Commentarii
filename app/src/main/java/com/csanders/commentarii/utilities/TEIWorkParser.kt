@@ -1,5 +1,6 @@
 package com.csanders.commentarii.utilities
 
+import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.util.Xml
 import androidx.compose.runtime.Composable
@@ -13,11 +14,8 @@ import java.io.InputStream
 
 class TEIWorkParser() {
 
-    //composable so we can grab the context
-    @Composable
     @Throws(XmlPullParserException::class, IOException::class, NotFoundException::class)
-    fun getBookFromResource(resourceID: Int): Book {
-        val context = LocalContext.current
+    fun getBookFromResource(resourceID: Int, context: Context): Book {
         val stream = context.resources.openRawResource(resourceID)
         return getBook(stream)
     }

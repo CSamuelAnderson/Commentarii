@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.csanders.commentarii.ui.screens.home.HomeScreen
 import com.csanders.commentarii.ui.screens.home.HomeViewModel
-import com.csanders.commentarii.ui.screens.textreader.TextReaderScreen
+import com.csanders.commentarii.ui.screens.textreader.PageReaderScreen
 import com.csanders.commentarii.ui.screens.textreader.TextReaderViewModel
 
 @Composable
@@ -26,7 +26,7 @@ fun CmtiiNavHost(
         }
         composable(TextReaderViewModel.route) {
             val textReaderViewModel = hiltViewModel<TextReaderViewModel>()
-            TextReaderScreen(viewModel = textReaderViewModel)
+            PageReaderScreen(viewModel = textReaderViewModel)
         }
     }
 }
