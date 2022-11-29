@@ -46,34 +46,34 @@ fun convertGeneratorsToParsedXml(
     workName: String,
     languages: List<String>,
     passages: List<String>
-): ParsedXml {
-    return ParsedXml(tag = TEIElement.TEI.element)
+): ParsedXml.Tag {
+    return ParsedXml.Tag(tag = TEIElement.TEI.element)
         .insertSubXml(
-            ParsedXml(tag = TEIElement.TeiHeader.element)
+            ParsedXml.Tag(tag = TEIElement.TeiHeader.element)
                 .insertSubXml(
-                    ParsedXml(tag = TEIHeader.FileDescription.element)
+                    ParsedXml.Tag(tag = TEIHeader.FileDescription.element)
                         .insertSubXml(
-                            ParsedXml(tag = TEIHeader.TitleStatement.element)
+                            ParsedXml.Tag(tag = TEIHeader.TitleStatement.element)
                                 .insertSubXml(
-                                    ParsedXml(tag = TEIHeader.Title.element)
+                                    ParsedXml.Tag(tag = TEIHeader.Title.element)
                                         .insertText(workName)
                                 )
                                 .insertSubXml(
-                                    ParsedXml(tag = TEIHeader.Author.element)
+                                    ParsedXml.Tag(tag = TEIHeader.Author.element)
                                         .insertText(authorName)
                                 )
                         )
                 )
                 .insertSubXml(
-                    ParsedXml(tag = TEIHeader.ProfileDescription.element)
+                    ParsedXml.Tag(tag = TEIHeader.ProfileDescription.element)
                         .insertSubXml(
-                            ParsedXml(
+                            ParsedXml.Tag(
                                 tag = TEIHeader.LanguagesUsed.element,
                                 subXml = languages.fold(listOf()) { languageXml, languageName ->
-                                    val subTag = ParsedXml(
+                                    val subTag = ParsedXml.Tag(
                                         tag = TEIHeader.Language.element,
                                         subXml = listOf(
-                                            ParsedXml(
+                                            ParsedXml.Text(
                                                 text = languageName
                                             )
                                         )
@@ -84,16 +84,16 @@ fun convertGeneratorsToParsedXml(
                 )
         )
         .insertSubXml(
-            ParsedXml(tag = TEIElement.Text.element)
+            ParsedXml.Tag(tag = TEIElement.Text.element)
                 .insertSubXml(
-                    ParsedXml(
+                    ParsedXml.Tag(
                         tag = TEIElement.TextBody.element,
                         //TODO: Right now each text gets one div and one paragraph. This doesn't provide confidence that we handle nested divs or other tags.
                         subXml = passages.fold(listOf()) { passageXml, passage ->
-                            val subTag = ParsedXml(
+                            val subTag = ParsedXml.Tag(
                                 tag = TEIElement.Div.element
                             ).insertSubXml(
-                                ParsedXml(tag = TEIElement.Paragraph.element)
+                                ParsedXml.Tag(tag = TEIElement.Paragraph.element)
                             ).insertText(passage)
                             passageXml + subTag
                         })
@@ -101,20 +101,18 @@ fun convertGeneratorsToParsedXml(
         )
 }
 
-fun ParsedXml.insertSubXml(subXml: ParsedXml): ParsedXml {
-    return ParsedXml(
+fun ParsedXml.Tag.insertSubXml(subXml: ParsedXml): ParsedXml.Tag {
+    return ParsedXml.Tag(
         tag = tag,
         attributes = attributes,
-        text = text,
         subXml = this.subXml + subXml
     )
 }
 
-fun ParsedXml.insertText(subText: String): ParsedXml {
-    return ParsedXml(
+fun ParsedXml.Tag.insertText(subText: String): ParsedXml.Tag {
+    return ParsedXml.Tag(
         tag = tag,
         attributes = attributes,
-        text = text,
-        subXml = this.subXml + ParsedXml(text = subText)
+        subXml = this.subXml + ParsedXml.Text(text = subText)
     )
 }

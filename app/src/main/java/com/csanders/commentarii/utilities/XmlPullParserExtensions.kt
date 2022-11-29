@@ -14,7 +14,7 @@ val ns: String? = null
  * General parsing
  */
 @Throws(IOException::class, XmlPullParserException::class)
-fun XmlPullParser.parseTag(startTag: String): ParsedXml {
+fun XmlPullParser.parseTag(startTag: String): ParsedXml.Tag {
     this.require(XmlPullParser.START_TAG, ns, startTag)
     val tag = this.name
     val attributes = this.readTagAttributes(startTag)
@@ -34,7 +34,7 @@ fun XmlPullParser.parseTag(startTag: String): ParsedXml {
         if (parser.eventType == XmlPullParser.TEXT && parser.text.isNotBlank()) {
             //Todo: Add the available text into our text element, but don't assert that we've finished reading.
             //Todo: make the text tag special. ie indicate there it has no tags with an Either or something.
-            val textTag = ParsedXml(text = parser.text.trim('\n'))
+            val textTag = ParsedXml.Text(text = parser.text.trim('\n'))
             subTags.add(textTag)
         }
 
@@ -49,7 +49,7 @@ fun XmlPullParser.parseTag(startTag: String): ParsedXml {
 
     val subTags = getSubTags(this)
 
-    return ParsedXml(
+    return ParsedXml.Tag(
         tag = tag,
         attributes = attributes,
         subXml = subTags
