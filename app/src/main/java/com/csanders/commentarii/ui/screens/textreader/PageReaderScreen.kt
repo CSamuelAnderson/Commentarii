@@ -39,7 +39,7 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var book by remember { mutableStateOf(viewModel.convertBookFromXml(context)) }
 
-    val contextForToast = LocalContext.current.applicationContext
+    val contextForToast = context.applicationContext
 
     fun onPageTurnRequested(turnPage: (Book) -> Either<IllegalStateException, Book>) {
         when (val updatedBook = turnPage(book)) {

@@ -2,7 +2,7 @@ package com.csanders.commentarii.utilities
 
 import android.app.Activity
 import android.os.AsyncTask
-import com.csanders.commentarii.datamodel.Work
+import com.csanders.commentarii.datamodel.Book
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.io.InputStream
@@ -79,7 +79,7 @@ class NetworkActivity : Activity() {
 
 
             //todo: we'll want this to be our TEIParser
-            val entries: List<Work> = downloadUrl(urlString)?.use { stream: InputStream ->
+            val entries: List<Book> = downloadUrl(urlString)?.use { stream: InputStream ->
                 // Instantiate the parser
                 //StackOverflowXmlParser().parse(stream)
                 emptyList()

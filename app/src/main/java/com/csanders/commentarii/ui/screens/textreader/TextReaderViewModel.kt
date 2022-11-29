@@ -1,7 +1,6 @@
 package com.csanders.commentarii.ui.screens.textreader
 
 import android.content.Context
-import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -11,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import arrow.core.Either
 import com.csanders.commentarii.R
 import com.csanders.commentarii.datamodel.*
-import com.csanders.commentarii.utilities.TEIWorkParser
+import com.csanders.commentarii.utilities.TEIBookParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -20,7 +19,7 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
     val semanticName = "text reader screen"
 
     fun convertBookFromXml(context: Context): Book {
-        val parser = TEIWorkParser()
+        val parser = TEIBookParser()
 //        return parser.getBookFromResource(R.raw.plato_symposium_grc)
         return parser.getBookFromResource(resourceID = R.raw.plato_symposium_eng, context = context)
     }
@@ -50,12 +49,12 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
     fun displayTitle(book: Book): AnnotatedString {
         return buildAnnotatedString {
             pushStyle(SpanStyle(fontSize = 24.sp))
-            append(book.header.title.title)
+            append(book.header.title.value)
             pop()
             append("\n")
-            append(book.header.author.author)
+            append(book.header.author.value)
             append("\n")
-            append(book.header.languagesUsed.joinToString(", ") { it.language })
+            append(book.header.languagesUsed.joinToString(", ") { it.value })
         }
     }
 

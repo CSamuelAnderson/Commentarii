@@ -22,8 +22,6 @@ fun convertToBook(parsedXmlTag: ParsedXml.Tag): Book {
         .findTag(TEIElement.TextBody.element)
         .convertToChapters()
 
-//    val body = convertToStupidSection(bodyTag)
-//    return Work(header, body)
     return Book(pages = chapters, header = header)
 }
 

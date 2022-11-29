@@ -11,7 +11,7 @@ import io.kotest.property.forAll
 fun Codepoint.Companion.ancientGreek(): Arb<Codepoint> =
     Arb.of((0x1F00..0x1FFF).map(::Codepoint))
 
-internal class WorkConverterTest : StringSpec({
+internal class BookConverterTest : StringSpec({
     "Preserves all strings" {
 
         forAll(
@@ -43,7 +43,7 @@ fun Book.gatherAllTexts(): List<String> {
 
 fun convertGeneratorsToParsedXml(
     authorName: String,
-    workName: String,
+    bookTitle: String,
     languages: List<String>,
     passages: List<String>
 ): ParsedXml.Tag {
@@ -56,7 +56,7 @@ fun convertGeneratorsToParsedXml(
                             ParsedXml.Tag(tag = TEIHeader.TitleStatement.element)
                                 .insertSubXml(
                                     ParsedXml.Tag(tag = TEIHeader.Title.element)
-                                        .insertText(workName)
+                                        .insertText(bookTitle)
                                 )
                                 .insertSubXml(
                                     ParsedXml.Tag(tag = TEIHeader.Author.element)

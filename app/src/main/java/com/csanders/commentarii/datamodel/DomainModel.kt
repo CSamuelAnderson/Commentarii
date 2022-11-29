@@ -53,13 +53,13 @@ data class Header(
 
 //Todo: eventually add a restricted setter to avoid making too long a name
 @JvmInline
-value class Author(val author: String)
+value class Author(val value: String)
 
 @JvmInline
-value class Language(val language: String)
+value class Language(val value: String)
 
 @JvmInline
-value class Title(val title: String)
+value class Title(val value: String)
 
 //Todo: Eventually, we'll want to make these generate automatically
 data class BookId(val id: BunkID)
