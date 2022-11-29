@@ -28,17 +28,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import arrow.core.Either
 import com.csanders.commentarii.datamodel.Book
+import com.csanders.commentarii.datamodel.ComposeUIElement
 
 
 @Composable
 fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
-    val scrollState = rememberScrollState()
-
-    //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
     val context = LocalContext.current
     var book by remember { mutableStateOf(viewModel.convertBookFromXml(context)) }
 
     val contextForToast = context.applicationContext
+    val scrollState = rememberScrollState()
 
     fun onPageTurnRequested(turnPage: (Book) -> Either<IllegalStateException, Book>) {
         when (val updatedBook = turnPage(book)) {
@@ -103,7 +102,7 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
 @Composable
 private fun ButtonRow(
     modifier: Modifier = Modifier,
-    buttons: List<@Composable () -> Unit>
+    buttons: List<ComposeUIElement>
 ) {
     if (buttons.isNotEmpty()) {
         Row(
@@ -114,10 +113,10 @@ private fun ButtonRow(
     }
 }
 
-private fun getTurnPageButtons(book: Book): (backButtonTapped: () -> Unit) -> (nextButtonTapped: () -> Unit) -> List<@Composable () -> Unit> {
+private fun getTurnPageButtons(book: Book): (backButtonTapped: () -> Unit) -> (nextButtonTapped: () -> Unit) -> List<ComposeUIElement> {
     return { backButtonTapped ->
         { nextButtonTapped ->
-            val buttons = mutableListOf<@Composable () -> Unit>()
+            val buttons = mutableListOf<ComposeUIElement>()
             if (book.pages.previousPages.isNotEmpty()) {
                 buttons.add {
                     TurnPageButton(

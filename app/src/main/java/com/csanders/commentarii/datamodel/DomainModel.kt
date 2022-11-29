@@ -1,5 +1,6 @@
 package com.csanders.commentarii.datamodel
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import com.csanders.commentarii.ui.theme.Typography
 
@@ -120,3 +121,9 @@ sealed class Marginalia
  */
 typealias Undefined = Exception
 typealias BunkID = Int
+
+/**
+ * This typealias is used to indicate that a function is Composable with a UI side-effect which is not tracked by a type.
+ * This shouldn't be used for non-UI functions that return Unit -- those should either return a more clear type or have their own typealias
+ */
+typealias ComposeUIElement = @Composable () -> Unit
