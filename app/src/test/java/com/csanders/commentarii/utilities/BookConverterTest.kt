@@ -1,7 +1,6 @@
 package com.csanders.commentarii.utilities
 
-import com.csanders.commentarii.datamodel.ParsedXml
-import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
@@ -20,37 +19,26 @@ internal class WorkConverterTest : StringSpec({
             Arb.choice(Arb.string(16), Arb.string(16, Codepoint.ancientGreek())),
             Arb.list(Arb.choice(Arb.string(14), Arb.string(16, Codepoint.ancientGreek())), 1..5),
             Arb.list(Arb.choice(Arb.string(360), Arb.string(360, Codepoint.ancientGreek())), 1..50)
-        ) { authorName, workName, languages, passages ->
-            val parsedXml = convertGeneratorsToParsedXml(authorName, workName, languages, passages)
-            val work = convertToWork(parsedXml)
+        ) { authorName, title, languages, passages ->
+            val parsedXml = convertGeneratorsToParsedXml(authorName, title, languages, passages)
+            val book = convertToBook(parsedXml)
 
-            val workTexts = gatherWorksText(work.text)
+            val texts = book.gatherAllTexts().filter { it.isNotBlank() }
 
-            work.header.author == authorName
-                    && work.header.title == workName
-                    && work.header.languagesUsed == languages
-                    && workTexts == passages
+            book.header.author == Author(authorName)
+                    && book.header.title == Title(title)
+                    && book.header.languagesUsed == languages.map { Language(it) }
+                    && texts == passages
         }
     }
 })
 
-fun gatherWorksText(section: Section): List<String> {
-
-    tailrec fun helpGather(acc: List<String>, stack: List<Section>): List<String> {
-        if(stack.isEmpty()) {
-            return acc
-        }
-
-        //If it isn't, then add the current section's text to our accumulator and go again
-        val subsection = stack.last()
-        if(subsection.text.isNotBlank()){
-            return helpGather(acc + subsection.text, stack.dropLast(1))
-        }
-
-        val newStack = stack.dropLast(1) + subsection.subsections.reversed()
-        return helpGather(acc, newStack)
+fun Book.gatherAllTexts(): List<String> {
+    val allChapters =
+        this.chapters.previousChapters + this.chapters.openedChapter + this.chapters.futureChapters
+    return allChapters.flatMap { chapter ->
+        chapter.passages.map { it.text }
     }
-    return helpGather(listOf(), listOf(section))
 }
 
 fun convertGeneratorsToParsedXml(

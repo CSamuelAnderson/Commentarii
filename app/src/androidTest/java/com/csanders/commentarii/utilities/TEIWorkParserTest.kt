@@ -20,7 +20,7 @@ class TEIWorkParserTest {
         parser = TEIWorkParser()
         composeTestRule.setContent {
             val goldenAssResource = R.raw.apuleius_golden_ass_lat
-            header = parser.getWorkFromResource(goldenAssResource).header
+            header = parser.getBookFromResource(goldenAssResource).header
         }
     }
 

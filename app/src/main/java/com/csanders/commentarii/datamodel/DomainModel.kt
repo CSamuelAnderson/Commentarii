@@ -36,21 +36,39 @@ import com.csanders.commentarii.ui.theme.Typography
 
 //A book is something you can reference and review.
 data class Book(
-    val id: BookId,
-    //Should be replaced with the ID later
-    val tableOfContentsId: TableOfContents,
-    val chaptersId: Chapters,
-    val title: ChapterHeading,
-    val author: Undefined,
-    val metaData: Undefined
+    val id: BunkID = -1,
+    //TODO: Should be replaced with the ID later
+    //No table of content for now
+//    val tableOfContentsId: TableOfContents,
+    val chapters: Chapters,
+    val header: Header
 )
 
-data class BookId(val id: Undefined)
+//Todo: eventually add a restricted setter to avoid making too long a name
+@JvmInline
+value class Author(val author: String)
 
-//a BookMark refers to the currently opened page, and can be moved back and forth between chapters
+@JvmInline
+value class Language(val language: String)
+
+@JvmInline
+value class Title(val title: String)
+
+data class Header(
+    val title: Title,
+    val author: Author,
+    val languagesUsed: List<Language>
+)
+
+//Todo: Eventually, we'll want to make these generate automatically
+data class BookId(val id: Int)
+
+//Refers to the currently opened page, and can be moved back and forth between chapters
+//Eventually, we'll want to make a LinkedList data structure so that we don't create new lists every page turn
 //Should be IDs after this.
+//Todo: Open/Closed and previous/future is a property of all pages, not just chapters.
 data class Chapters(
-    val bookMarkId: Undefined,
+    val ChaptersID: BunkID = -1,
     val openedChapter: Chapter,
     val previousChapters: List<Chapter>,
     val futureChapters: List<Chapter>,
@@ -58,14 +76,13 @@ data class Chapters(
 
 //A page is something you can open to.
 sealed class Page(
-    val Texts: List<Passage>,
-    val id: Undefined
+    val passages: List<Passage>,
+    val id: BunkID
 )
 
-class TableOfContents(texts: List<Passage>, id: Undefined) : Page(texts, id)
-class Chapter(val chapterHeading: ChapterHeading, texts: List<Passage>, id: Undefined) :
-    Page(texts, id)
-
+class TableOfContents(passages: List<Passage>, id: BunkID = -1) : Page(passages, id)
+class Chapter(val chapterHeading: ChapterHeading, passages: List<Passage>, id: BunkID = -1) :
+    Page(passages, id)
 
 //Todo: Styling will eventually need its own class, since we want the user to be able to configure it, we don't want to save TextStyle right away
 sealed class Section(
@@ -93,3 +110,4 @@ class Passage(text: String, styling: TextStyle = Typography.bodyMedium) :
  * setting up an Undefined type so we can continue to model without knowing the guts of the types.
  */
 typealias Undefined = Exception
+typealias BunkID = Int

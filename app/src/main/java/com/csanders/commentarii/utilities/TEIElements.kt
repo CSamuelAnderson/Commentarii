@@ -3,9 +3,9 @@ package com.csanders.commentarii.utilities
 //For now we only encode the TEI Lite package
 //Some of which is missing here:
 //Links
-//TODO: Some of the attributes should be re-organized so that elements are not in it.
 
 //Part of the TEI Lite package. See https://tei-c.org/release/doc/tei-p5-exemplars/pdf/tei_lite.doc.pdf
+//TODO: Convert to Sealed class that categorizes these in a more smart way
 enum class TEIElement(val element: String) {
     //Primary elements
     TEI("TEI"),

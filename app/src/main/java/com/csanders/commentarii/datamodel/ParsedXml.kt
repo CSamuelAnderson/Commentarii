@@ -1,5 +1,6 @@
 package com.csanders.commentarii.datamodel
 
+//Todo: Convert to Sealed class
 data class ParsedXml(
     val tag: String = "",
     val attributes: Map<String, String> = mapOf(),

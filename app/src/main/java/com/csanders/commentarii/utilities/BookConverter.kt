@@ -12,33 +12,35 @@ import com.csanders.commentarii.ui.theme.Typography
  * Converts ParsedXml into a Work data class.
  */
 
-fun convertToWork(parsedXml: ParsedXml): Work {
+fun convertToBook(parsedXml: ParsedXml): Book {
     if (parsedXml.tag != TEIElement.TEI.element) {
         /**
          * We'll eventually want to wrap this in a Result or something, so we can handle bad cases like this.
          */
-        return Work(WorkHeader(), listOf(Section2()))
+//        return EmptyBook()
     }
+    val header = parsedXml.convertToHeader()
 
-    val header = getHeader(parsedXml)
-    val bodyTag = parsedXml
+    val chapters = parsedXml
         .findTag(TEIElement.Text.element)
         .findTag(TEIElement.TextBody.element)
+        .convertToChapters()
+
 //    val body = convertToStupidSection(bodyTag)
-    val body = convertToOldSection(parsedXml = bodyTag)
-    return Work(header, body)
+//    return Work(header, body)
+    return Book(chapters = chapters, header = header)
 }
 
 /**
  * Basic, one use-case function to help with the header
  */
-private fun getHeader(parsedXml: ParsedXml): WorkHeader {
-    val titleStatementTag = parsedXml
+private fun ParsedXml.convertToHeader(): Header {
+    val titleStatementTag = this
         .findTag(TEIElement.TeiHeader.element)
         .findTag(TEIHeader.FileDescription.element)
         .findTag(TEIHeader.TitleStatement.element)
 
-    val languagesUsedTag = parsedXml
+    val languagesUsedTag = this
         .findTag(TEIElement.TeiHeader.element)
         .findTag(TEIHeader.ProfileDescription.element)
         .findTag(TEIHeader.LanguagesUsed.element)
@@ -51,44 +53,59 @@ private fun getHeader(parsedXml: ParsedXml): WorkHeader {
         .findTag(TEIHeader.Title.element)
         .getFirstText()
 
-    val languages = languagesUsedTag.subXml.fold(listOf<String>()) { acc, languageTag ->
+    val languages = languagesUsedTag.subXml.fold(listOf<Language>()) { acc, languageTag ->
         when (val language = languageTag.getFirstText()) {
             null -> acc
-            else -> acc + language
+            else -> acc + Language(language)
         }
     }
 
-    return WorkHeader(
-        author = author ?: "Unknown Author",
-        title = title ?: "Unknown Work",
-        languagesUsed = languages
-    )
+    return Header(Title(title ?: "Unknown Author"), Author(author ?: "Unknown Work"), languages)
 }
 
+//Todo: This is complicated enough to need documentation
+//  also, one result here that isn't easy to see is that ParsedXml with no text will still add a new passage.
+//  This will probably be handled better when we change up the type system for ParsedXml, but it's unintuitive and unnecessary.
 private fun ParsedXml.convertToChapters(): Chapters {
 
-    fun ParsedXml.convertSubXmlToChapters(
-        pages: List<Chapter> = listOf(),
-        accPage: Chapter
+    val addSectionWithMediumBody =
+        addPassage(Typography.bodyMedium) //Playing around with partial applications, just right now we're just being fancy
+
+    tailrec fun convertSubXmlToChapters(
+        stackOfXml: MutableList<ParsedXml>,
+        chapters: List<Chapter> = listOf(),
+        accChapter: Chapter
     ): List<Chapter> {
-        val addSection = addSection(Typography.bodyMedium) //Partially applied based on the current section's idk what I'm doing I'm fiddling around lol
-        return this.subXml.flatMap { child ->
-            when (child.shouldPageBreak()) {
-                true -> {
-                    convertSubXmlToChapters(
-                        pages + accPage,
-                        Chapter(child.getChapterHeading(), listOf())
-                    )
-                }
-                false -> {
-                    convertSubXmlToChapters(pages, addSection(accPage)(child.text))
+        return when (stackOfXml.isEmpty()) {
+            true -> chapters + accChapter
+            false -> {
+                val parsedXml = stackOfXml.removeLast()
+                stackOfXml.addAll(parsedXml.subXml.reversed())
+
+                //Todo: This can be handled by the type system
+                when (parsedXml.shouldPageBreak()) {
+                    true ->
+                        convertSubXmlToChapters(
+                            stackOfXml,
+                            chapters + accChapter,
+                            Chapter(parsedXml.getChapterHeading(), listOf())
+                        )
+                    false ->
+                        convertSubXmlToChapters(
+                            stackOfXml,
+                            chapters,
+                            addSectionWithMediumBody(accChapter)(parsedXml.text)
+                        )
                 }
             }
         }
     }
 
     val allChapters =
-        this.convertSubXmlToChapters(accPage = Chapter(this.getChapterHeading(), listOf()))
+        convertSubXmlToChapters(
+            stackOfXml = this.subXml.reversed().toMutableList(),
+            accChapter = Chapter(this.getChapterHeading(), listOf())
+        )
     return Chapters(
         openedChapter = allChapters.first(),
         previousChapters = listOf(),
@@ -96,10 +113,10 @@ private fun ParsedXml.convertToChapters(): Chapters {
     )
 }
 
-private fun addSection(styling: TextStyle): (Chapter) -> (String) -> Chapter {
+private fun addPassage(styling: TextStyle): (Chapter) -> (String) -> Chapter {
     return { chapter ->
         { sectionString ->
-            Chapter(chapter.chapterHeading, chapter.Texts + Passage(sectionString, styling))
+            Chapter(chapter.chapterHeading, chapter.passages + Passage(sectionString, styling))
         }
     }
 }

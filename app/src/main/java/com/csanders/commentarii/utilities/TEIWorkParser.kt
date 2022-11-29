@@ -4,9 +4,7 @@ import android.content.res.Resources.NotFoundException
 import android.util.Xml
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.csanders.commentarii.datamodel.Section
-import com.csanders.commentarii.datamodel.Work
-import com.csanders.commentarii.datamodel.WorkHeader
+import com.csanders.commentarii.datamodel.Book
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -18,14 +16,14 @@ class TEIWorkParser() {
     //composable so we can grab the context
     @Composable
     @Throws(XmlPullParserException::class, IOException::class, NotFoundException::class)
-    fun getWorkFromResource(resourceID: Int): Work {
+    fun getBookFromResource(resourceID: Int): Book {
         val context = LocalContext.current
         val stream = context.resources.openRawResource(resourceID)
-        return getWork(stream)
+        return getBook(stream)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    fun getWork(inputStream: InputStream): Work {
+    fun getBook(inputStream: InputStream): Book {
         inputStream.use { stream ->
             val parser: XmlPullParser = Xml.newPullParser()
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
@@ -33,7 +31,7 @@ class TEIWorkParser() {
             parser.nextTag()
             //Todo: If (TEI), read work, if (TEICorpus), read many works, else return empty work or error
             val parsedXml = parser.parseTag(TEIElement.TEI.element)
-            return convertToWork(parsedXml)
+            return convertToBook(parsedXml)
         }
     }
 }

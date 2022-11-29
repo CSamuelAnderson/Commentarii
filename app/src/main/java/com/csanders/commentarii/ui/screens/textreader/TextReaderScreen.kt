@@ -26,10 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.csanders.commentarii.datamodel.Section
-import com.csanders.commentarii.datamodel.Section2
-import com.csanders.commentarii.datamodel.Work
-import com.csanders.commentarii.datamodel.WorkHeader
 
 
 @Composable
@@ -37,20 +33,14 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
 
     //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
-    var work by remember { mutableStateOf(Work(WorkHeader(), listOf(Section2()))) }
-    work = viewModel.getWork()
-    val toc by remember { mutableStateOf(viewModel.getTOC(work)) }
-
-    var forwardPages by remember { mutableStateOf(toc.reversed()) }
-    var backPages by remember { mutableStateOf(listOf<Section2>()) }
-
-    var currentSection by remember { mutableStateOf(forwardPages.last()) }
+    val viewModelBook = viewModel.getBook()
+    var book by remember { mutableStateOf(viewModelBook) }
 
     val contextForToast = LocalContext.current.applicationContext
 
     //Todo: obviously this could use some refactoring
     fun onPreviousSectionRequested() {
-        when (backPages.isEmpty()) {
+        when (book.chapters.previousChapters.isEmpty()) {
             true -> Toast.makeText(
                 contextForToast,
                 "all out of pages!",
@@ -60,15 +50,15 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
             false -> {
                 //todo: this is creating a new list every time, which is inefficient.
                 //  Since we don't want to mix mutable state and mutable list, we should make the Joy of Kotlin linked list or borrow from Arrow
-                forwardPages += currentSection
-                currentSection = backPages.last()
-                backPages = backPages.dropLast(1)
+//                forwardPages += currentSection
+//                currentSection = backPages.last()
+//                backPages = backPages.dropLast(1)
             }
         }
     }
 
     fun onNextSectionRequested() {
-        when (forwardPages.isEmpty()) {
+        when (book.chapters.futureChapters.isEmpty()) {
             true -> Toast.makeText(
                 contextForToast,
                 "all out of pages!",
@@ -76,9 +66,9 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
             )
                 .show()
             false -> {
-                backPages += currentSection
-                currentSection = forwardPages.last()
-                forwardPages = forwardPages.dropLast(1)
+//                backPages += currentSection
+//                currentSection = forwardPages.last()
+//                forwardPages = forwardPages.dropLast(1)
             }
         }
 
@@ -100,12 +90,14 @@ fun TextReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
             LazyColumn() {
                 item {
                     Text(
-                        text = viewModel.displayTitle(work),
+                        text = "Butt"
+//                        text = viewModel.displayTitle(book),
                     )
                 }
                 item {
                     Text(
-                        text = viewModel.displaySection(currentSection),
+//                        text = viewModel.displaySections(book.chapters.openedChapter.passages),
+                        text = "Butt",
                         modifier = Modifier.padding(horizontal = 3.dp)
                     )
                 }
