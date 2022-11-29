@@ -10,7 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 
 
-class TEIBookParser() {
+class TEIBookParser {
 
     @Throws(XmlPullParserException::class, IOException::class, NotFoundException::class)
     fun getBookFromResource(resourceID: Int, context: Context): Book {

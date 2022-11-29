@@ -35,7 +35,6 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
 
     //Todo: Obviously we'll want to put state in the view model or in a StateHolder. For now we'll just set it here.
-//    val viewModelBook = viewModel.convertBookFromXml()
     val context = LocalContext.current
     var book by remember { mutableStateOf(viewModel.convertBookFromXml(context)) }
 
@@ -55,7 +54,6 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
         }
     }
 
-    //Todo: obviously this could use some refactoring
     fun onNextPageRequested() {
         onPageTurnRequested { viewModel.turnPageForward(it) }
     }
@@ -75,7 +73,7 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
                 .scrollable(scrollState, Orientation.Vertical)
         ) {
             //Todo: lazy columns can have bad performance because they must trigger a recompose one level higher than themselves. If you wrap them it should go away
-            LazyColumn() {
+            LazyColumn {
                 //Todo: Make Display page return a list of things we can use as items. That way we don't have to load everything all at once.
                 item {
                     Text(
@@ -99,14 +97,6 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
                 .align(Alignment.BottomCenter),
             buttons = buttons
         )
-//        TurnPageBanner(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(30.dp)
-//                .align(Alignment.BottomCenter),
-//            leftButtonTapped = ::onPreviousPageRequested,
-//            rightButtonTapped = ::onNextPageRequested
-//        )
     }
 }
 
@@ -157,21 +147,6 @@ private fun getTurnPageButtons(book: Book): (backButtonTapped: () -> Unit) -> (n
 }
 
 @Composable
-private fun TurnPageBanner(
-    modifier: Modifier = Modifier,
-    leftButtonTapped: () -> Unit,
-    rightButtonTapped: () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .background(Color.Transparent)
-    ) {
-
-
-    }
-}
-
-@Composable
 private fun TurnPageButton(
     modifier: Modifier = Modifier,
     onButtonTapped: () -> Unit,
@@ -195,5 +170,5 @@ private fun TurnPageButton(
 @Preview
 @Composable
 fun PreviewTextReader() {
-    PageReaderScreen(viewModel = hiltViewModel<TextReaderViewModel>())
+    PageReaderScreen(viewModel = hiltViewModel())
 }

@@ -102,20 +102,6 @@ private fun ParsedXml.Tag.convertToChapters(): Pages {
                         )
                     }
                 }
-//                when (parsedXml.shouldPageBreak()) {
-//                    true ->
-//                        convertSubXmlToChapters(
-//                            stackOfXml,
-//                            chapters + accChapter,
-//                            Chapter(parsedXml.getChapterHeading(), listOf())
-//                        )
-//                    false ->
-//                        convertSubXmlToChapters(
-//                            stackOfXml,
-//                            chapters,
-//                            addSectionWithMediumBody(accChapter)(parsedXml.text)
-//                        )
-//                }
             }
         }
     }

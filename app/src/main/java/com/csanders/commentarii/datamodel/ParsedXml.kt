@@ -5,7 +5,7 @@ package com.csanders.commentarii.datamodel
  *      Tag is a subclass responsible for holding the tag, attributes, and any nested xml.
  *      Text is a subclass responsible for hilding the text of the xml involved.
  */
-sealed class ParsedXml() {
+sealed class ParsedXml {
     class Tag(
         val tag: String = "",
         val attributes: Map<String, String> = mapOf(),

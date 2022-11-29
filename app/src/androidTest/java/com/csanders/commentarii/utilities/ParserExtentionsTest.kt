@@ -4,7 +4,6 @@ import android.util.Xml
 import org.junit.Assert
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParser
-import kotlin.math.exp
 
 //Parser tests independent of any particular Xml file
 //Sadly must be an instrumentation test because XmlPullParser is a part of the Android library.
@@ -42,8 +41,8 @@ class ParserExtensionsTest {
         val parser = setupParser(tagWithNoAttributes)
         val observedAttributes = parser.readTagAttributes("div")
 
-        val expectedAttributes = mapOf<String,String>()
+        val expectedAttributes = mapOf<String, String>()
 
-        Assert.assertEquals(expectedAttributes,observedAttributes)
+        Assert.assertEquals(expectedAttributes, observedAttributes)
     }
 }
