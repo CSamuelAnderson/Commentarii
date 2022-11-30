@@ -9,7 +9,7 @@ import com.csanders.commentarii.ui.theme.Typography
  */
 
 fun convertToBook(parsedXmlTag: ParsedXml.Tag): Book {
-    if (parsedXmlTag.tag != TEIElement.TEI.element) {
+    if (parsedXmlTag.tag != PrimaryTag.TeiBook) {
         /**
          * We'll eventually want to wrap this in a Result or something, so we can handle bad cases like this.
          */
@@ -18,8 +18,8 @@ fun convertToBook(parsedXmlTag: ParsedXml.Tag): Book {
     val header = parsedXmlTag.convertToHeader()
 
     val chapters = parsedXmlTag
-        .findTag(TEIElement.Text.element)
-        .findTag(TEIElement.TextBody.element)
+        .findTag(TextTag.Text)
+        .findTag(TextTag.TextBody)
         .convertToChapters()
 
     return Book(pages = chapters, header = header)

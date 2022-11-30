@@ -1,7 +1,6 @@
 package com.csanders.commentarii.utilities
 
-import com.csanders.commentarii.datamodel.ParsedXml
-import com.csanders.commentarii.datamodel.Section
+import com.csanders.commentarii.datamodel.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -14,33 +13,34 @@ val ns: String? = null
  * General parsing
  */
 @Throws(IOException::class, XmlPullParserException::class)
-fun XmlPullParser.parseTag(startTag: String): ParsedXml.Tag {
-    this.require(XmlPullParser.START_TAG, ns, startTag)
-    val tag = this.name
+fun XmlPullParser.parseTag(startTag: TeiTag): ParsedXml.Tag {
+    //Todo: We can curry the parsing here with these three things. And then handle throwing via an Either block.
+    this.require(XmlPullParser.START_TAG, ns, startTag.tag)
     val attributes = this.readTagAttributes(startTag)
+    val tagMap = getXmlTagStrings()
 
     tailrec fun getSubTags(
         parser: XmlPullParser,
-        //Todo: this does not save the text in order with subtags!
         subTags: MutableList<ParsedXml> = mutableListOf(),
     ): List<ParsedXml> {
 
-        if (parser.name == startTag && parser.eventType == XmlPullParser.END_TAG) {
+        if (parser.name == startTag.tag && parser.eventType == XmlPullParser.END_TAG) {
             return subTags.toList()
         }
 
         parser.next()
 
         if (parser.eventType == XmlPullParser.TEXT && parser.text.isNotBlank()) {
-            //Todo: Add the available text into our text element, but don't assert that we've finished reading.
-            //Todo: make the text tag special. ie indicate there it has no tags with an Either or something.
             val textTag = ParsedXml.Text(text = parser.text.trim('\n'))
             subTags.add(textTag)
         }
 
         //Since this isn't a call to the tailrec part of this section, this could overflow the stack if the XMl file has too many nested tags.
         if (parser.eventType == XmlPullParser.START_TAG) {
-            subTags.add(parser.parseTag(parser.name))
+            when (val tag = tagMap[parser.name]) {
+                null -> {}
+                else -> subTags.add(parser.parseTag(tag))
+            }
         }
 
         //Now that we're on a new piece, start it over again.
@@ -50,27 +50,32 @@ fun XmlPullParser.parseTag(startTag: String): ParsedXml.Tag {
     val subTags = getSubTags(this)
 
     return ParsedXml.Tag(
-        tag = tag,
+        tag = startTag,
         attributes = attributes,
         subXml = subTags
     )
 }
 
 @Throws(IOException::class, XmlPullParserException::class)
-fun XmlPullParser.readTagAttributes(startTag: String): Map<String, String> {
-    this.require(XmlPullParser.START_TAG, ns, startTag)
+fun XmlPullParser.readTagAttributes(startTag: TeiTag): Map<TeiAttribute, String> {
+    this.require(XmlPullParser.START_TAG, ns, startTag.tag)
     val numOfAttributes = this.attributeCount
+    val attributeMap = getXmlAttributeStrings()
 
     tailrec fun helper(
         attributeIndex: Int = 0,
-        parsedAttributes: MutableMap<String, String> = mutableMapOf()
-    ): Map<String, String> {
+        parsedAttributes: MutableMap<TeiAttribute, String> = mutableMapOf()
+    ): Map<TeiAttribute, String> {
 
         if (attributeIndex > numOfAttributes - 1) {
             return parsedAttributes.toMap()
         }
-        parsedAttributes[this.getAttributeName(attributeIndex)] =
-            this.getAttributeValue(attributeIndex)
+        when (val attribute = attributeMap[this.getAttributeName(attributeIndex)]) {
+            null -> {}
+            else -> parsedAttributes[attribute] =
+                    this.getAttributeValue(attributeIndex)
+        }
+
 
         return helper(attributeIndex + 1, parsedAttributes)
     }

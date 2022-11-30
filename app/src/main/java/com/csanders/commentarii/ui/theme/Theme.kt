@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
+import com.csanders.commentarii.datamodel.ComposeUIElement
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -42,7 +43,7 @@ fun CommentariiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: ComposeUIElement
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

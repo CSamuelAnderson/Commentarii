@@ -68,7 +68,6 @@ data class BookId(val id: BunkID)
 //Refers to the currently opened page, and can be moved back and forth between chapters
 //Eventually, we'll want to make a LinkedList data structure so that we don't create new lists every page turn
 //Should be IDs after this.
-//Todo: Open/Closed and previous/future is a property of all pages, not just chapters.
 data class Pages(
     val pagesID: BunkID = -1,
     val openedPage: Page,

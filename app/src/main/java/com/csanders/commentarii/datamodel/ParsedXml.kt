@@ -7,17 +7,16 @@ package com.csanders.commentarii.datamodel
  */
 sealed class ParsedXml {
     class Tag(
-        val tag: String = "",
-        val attributes: Map<String, String> = mapOf(),
+        val tag: TeiTag,
+        val attributes: Map<TeiAttribute, String> = mapOf(),
         val subXml: List<ParsedXml> = listOf()
     ) : ParsedXml() {
-        fun findTag(tagToFind: String): Tag {
+        fun findTag(tagToFind: TeiTag): Tag? {
             return this.subXml.filterIsInstance<Tag>().find { it.tag == tagToFind }
-                ?: Tag()
         }
 
-        fun getFirstText(): String? {
-            return this.subXml.filterIsInstance<Text>().find { it.text.isNotBlank() }?.text
+        fun getFirstText(): Text? {
+            return this.subXml.filterIsInstance<Text>().find { it.text.isNotBlank() }
         }
 
     }

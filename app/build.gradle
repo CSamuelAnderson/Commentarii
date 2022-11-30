@@ -108,6 +108,7 @@ dependencies {
 
     // Arrow
     implementation("io.arrow-kt:arrow-core:1.1.2")
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
 }
 
 // Allow references to generated code

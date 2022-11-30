@@ -24,14 +24,6 @@ class TextReaderViewModel @Inject constructor() : ViewModel() {
         return parser.getBookFromResource(resourceID = R.raw.plato_symposium_eng, context = context)
     }
 
-    fun emptyBook(): Book {
-        return Book(
-            -1,
-            Pages(-1, Chapter(ChapterHeading("Empty Chapter"), listOf()), listOf(), listOf()),
-            Header(Title(""), Author(""), listOf())
-        )
-    }
-
     //Todo: Eventually we'll want getText running in the background or something.
     @Composable
     fun displayPage(page: Page): AnnotatedString {
