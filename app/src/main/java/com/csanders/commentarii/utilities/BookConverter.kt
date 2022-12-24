@@ -1,66 +1,129 @@
 package com.csanders.commentarii.utilities
 
+import android.util.Log
 import androidx.compose.ui.text.TextStyle
+import arrow.core.Either
+import arrow.core.flatMap
 import com.csanders.commentarii.datamodel.*
+import com.csanders.commentarii.datamodel.Author
+import com.csanders.commentarii.datamodel.Language
+import com.csanders.commentarii.datamodel.MetadataAttribute.ReferenceNumber
+import com.csanders.commentarii.datamodel.MetadataTag.*
+import com.csanders.commentarii.datamodel.TextTag.TeiText
+import com.csanders.commentarii.datamodel.TextTag.TextBody
+import com.csanders.commentarii.datamodel.Title
 import com.csanders.commentarii.ui.theme.Typography
 
 /**
- * Converts ParsedXml into a Work data class.
+ * Converts ParsedXml into a Book data class.
  */
+//Todo: Create a tag for error logging
+//Todo: Separate the error strings/etc. into internationalized strings
 
-fun convertToBook(parsedXmlTag: ParsedXml.Tag): Book {
-    if (parsedXmlTag.tag != PrimaryTag.TeiBook) {
+typealias bookConversion = (ParsedXml) -> Book
+
+fun convertToBook(parsedXml: ParsedXml.Tag): Book {
+    if (parsedXml.tag != StartingTag.TeiBook) {
         /**
          * We'll eventually want to wrap this in a Result or something, so we can handle bad cases like this.
          */
 //        return EmptyBook()
     }
-    val header = parsedXmlTag.convertToHeader()
+    val header = parsedXml.convertToHeader()
 
-    val chapters = parsedXmlTag
-        .findTag(TextTag.Text)
-        .findTag(TextTag.TextBody)
-        .convertToChapters()
+    val startOfText = parsedXml.findTag(TeiText)
+        .flatMap { it.findTag(TextBody) }
+
+    val chapters =
+        when (startOfText) {
+            is Either.Right -> startOfText.value.convertToChapters()
+            is Either.Left -> {
+                Log.e(null, startOfText.value.message)
+                emptyChapter()
+            }
+        }
 
     return Book(pages = chapters, header = header)
 }
+
+private fun emptyChapter(): Pages {
+    return Pages(
+        openedPage = Chapter(ChapterHeading(""), listOf()),
+        previousPages = listOf(),
+        futurePages = listOf()
+    )
+}
+
 
 /**
  * Basic, one use-case function to help with the header
  */
 private fun ParsedXml.Tag.convertToHeader(): Header {
     val titleStatementTag = this
-        .findTag(TEIElement.TeiHeader.element)
-        .findTag(TEIHeader.FileDescription.element)
-        .findTag(TEIHeader.TitleStatement.element)
+        .findTag(TeiHeader)
+        .flatMap { it.findTag(FileDescription) }
+        .flatMap { it.findTag(TitleStatement) }
 
-    val languagesUsedTag = this
-        .findTag(TEIElement.TeiHeader.element)
-        .findTag(TEIHeader.ProfileDescription.element)
-        .findTag(TEIHeader.LanguagesUsed.element)
+    val maybeLanguages = this
+        .findTag(TeiHeader)
+        .flatMap { it.findTag(ProfileDescription) }
+        .flatMap { it.findTag(LanguagesUsed) }
+        .map {
+            it.subXml.filterIsInstance<ParsedXml.Tag>()
+                .map { languageTag -> languageTag.getFirstText() }
+        }
 
-    val author = titleStatementTag
-        .findTag(TEIHeader.Author.element)
-        .getFirstText()
-
-    val title = titleStatementTag
-        .findTag(TEIHeader.Title.element)
-        .getFirstText()
-
-    val languages = languagesUsedTag.subXml.filterIsInstance<ParsedXml.Tag>()
-        .fold(listOf<Language>()) { acc, languageTag ->
-            when (val language = languageTag.getFirstText()) {
-                null -> acc
-                else -> acc + Language(language)
+    val author =
+        when (val maybeAuthor = titleStatementTag
+            .flatMap { it.findTag(MetadataTag.Author) }
+            .flatMap { it.getFirstText() }) {
+            is Either.Right -> maybeAuthor.value.text
+            is Either.Left -> {
+                Log.e(null, maybeAuthor.value.message)
+                "Unknown author"
             }
         }
 
-    return Header(Title(title ?: "Unknown Author"), Author(author ?: "Unknown Work"), languages)
+    val title =
+        when (val maybeTitle =
+            titleStatementTag
+                .flatMap { it.findTag(MetadataTag.Title) }
+                .flatMap { it.getFirstText() }) {
+            is Either.Right -> maybeTitle.value.text
+            is Either.Left -> {
+                Log.e(null, maybeTitle.value.message)
+                "Unknown title"
+            }
+        }
+
+
+    val languages =
+        when (maybeLanguages) {
+            is Either.Right -> {
+                maybeLanguages.value.map {
+                    when (it) {
+                        is Either.Right -> it.value.text
+                        is Either.Left -> {
+                            Log.e(null, it.value.message)
+                            "Unknown Language"
+                        }
+                    }
+                }
+            }
+            is Either.Left -> {
+                Log.e(null, maybeLanguages.value.message)
+                listOf("Unknown Languages")
+            }
+        }
+
+    return Header(
+        Title(title),
+        Author(author),
+        languages.map { Language(it) }
+    )
 }
 
 //Todo: This is complicated enough to need documentation
-//  also, one result here that isn't easy to see is that ParsedXml with no text will still add a new passage.
-//  This will probably be handled better when we change up the type system for ParsedXml, but it's unintuitive and unnecessary.
 private fun ParsedXml.Tag.convertToChapters(): Pages {
 
     val addSectionWithMediumBody =
@@ -79,8 +142,8 @@ private fun ParsedXml.Tag.convertToChapters(): Pages {
                         stackOfXml.addAll(parsedXml.subXml.reversed())
 
                         //Todo: we should probably make page break a core piece of the type.
-                        when (parsedXml.shouldPageBreak()) {
-                            true -> convertSubXmlToChapters(
+                        when (parsedXml) {
+                            is DivisionTag -> convertSubXmlToChapters(
                                 stackOfXml,
                                 chapters + accChapter,
                                 Chapter(parsedXml.getChapterHeading(), listOf())
@@ -128,17 +191,12 @@ private fun addPassage(styling: TextStyle): (Chapter) -> (String) -> Chapter {
 
 private fun ParsedXml.Tag.getChapterHeading(): ChapterHeading {
     val attributeHeader = this.attributes.getOrDefault(
-        TEIAttributes.Type.attribute, ""
+        TeiAttribute.Type, ""
     ) + " " + this.attributes.getOrDefault(
-        TEIAttributes.Subtype.attribute, ""
-    ) + " " + this.attributes.getOrDefault(TEIAttributes.ReferenceNumber.attribute, "")
+        TeiAttribute.Subtype, ""
+    ) + " " + this.attributes.getOrDefault(ReferenceNumber, "")
     return when (attributeHeader.isBlank()) {
         true -> ChapterHeading("New Chapter!")
         false -> ChapterHeading(attributeHeader)
     }
-}
-
-
-private fun ParsedXml.Tag.shouldPageBreak(): Boolean {
-    return this.tag == TEIElement.Div.element
 }

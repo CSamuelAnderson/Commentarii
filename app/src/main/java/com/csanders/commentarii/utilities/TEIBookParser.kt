@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.util.Xml
 import com.csanders.commentarii.datamodel.Book
-import com.csanders.commentarii.datamodel.PrimaryTag
+import com.csanders.commentarii.datamodel.StartingTag
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -27,7 +27,7 @@ class TEIBookParser {
             parser.setInput(stream, null)
             parser.nextTag()
             //Todo: If (TEI), read work, if (TEICorpus), read many works, else return empty work or error
-            val parsedXml = parser.parseTag(PrimaryTag.TeiBook)
+            val parsedXml = parser.parseTag(StartingTag.TeiBook)
             return convertToBook(parsedXml)
         }
     }

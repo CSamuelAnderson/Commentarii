@@ -1,6 +1,8 @@
 package com.csanders.commentarii.utilities
 
 import com.csanders.commentarii.datamodel.*
+import com.csanders.commentarii.datamodel.MetadataTag.TeiHeader
+import com.csanders.commentarii.datamodel.StartingTag.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
@@ -47,31 +49,31 @@ fun convertGeneratorsToParsedXml(
     languages: List<String>,
     passages: List<String>
 ): ParsedXml.Tag {
-    return ParsedXml.Tag(tag = TEIElement.TEI.element)
+    return ParsedXml.Tag(tag = TeiBook)
         .insertSubXml(
-            ParsedXml.Tag(tag = TEIElement.TeiHeader.element)
+            ParsedXml.Tag(tag = TeiHeader)
                 .insertSubXml(
-                    ParsedXml.Tag(tag = TEIHeader.FileDescription.element)
+                    ParsedXml.Tag(tag = MetadataTag.FileDescription)
                         .insertSubXml(
-                            ParsedXml.Tag(tag = TEIHeader.TitleStatement.element)
+                            ParsedXml.Tag(tag = MetadataTag.TitleStatement)
                                 .insertSubXml(
-                                    ParsedXml.Tag(tag = TEIHeader.Title.element)
+                                    ParsedXml.Tag(tag = MetadataTag.Title)
                                         .insertText(bookTitle)
                                 )
                                 .insertSubXml(
-                                    ParsedXml.Tag(tag = TEIHeader.Author.element)
+                                    ParsedXml.Tag(tag = MetadataTag.Author)
                                         .insertText(authorName)
                                 )
                         )
                 )
                 .insertSubXml(
-                    ParsedXml.Tag(tag = TEIHeader.ProfileDescription.element)
+                    ParsedXml.Tag(tag = MetadataTag.ProfileDescription)
                         .insertSubXml(
                             ParsedXml.Tag(
-                                tag = TEIHeader.LanguagesUsed.element,
+                                tag = MetadataTag.LanguagesUsed,
                                 subXml = languages.fold(listOf()) { languageXml, languageName ->
                                     val subTag = ParsedXml.Tag(
-                                        tag = TEIHeader.Language.element,
+                                        tag = MetadataTag.Language,
                                         subXml = listOf(
                                             ParsedXml.Text(
                                                 text = languageName
@@ -84,16 +86,16 @@ fun convertGeneratorsToParsedXml(
                 )
         )
         .insertSubXml(
-            ParsedXml.Tag(tag = TEIElement.Text.element)
+            ParsedXml.Tag(tag = TextTag.TeiText)
                 .insertSubXml(
                     ParsedXml.Tag(
-                        tag = TEIElement.TextBody.element,
+                        tag = TextTag.TextBody,
                         //TODO: Right now each text gets one div and one paragraph. This doesn't provide confidence that we handle nested divs or other tags.
                         subXml = passages.fold(listOf()) { passageXml, passage ->
                             val subTag = ParsedXml.Tag(
-                                tag = TEIElement.Div.element
+                                tag = DivisionTag.Div
                             ).insertSubXml(
-                                ParsedXml.Tag(tag = TEIElement.Paragraph.element)
+                                ParsedXml.Tag(tag = SectiionTag.Paragraph)
                             ).insertText(passage)
                             passageXml + subTag
                         })

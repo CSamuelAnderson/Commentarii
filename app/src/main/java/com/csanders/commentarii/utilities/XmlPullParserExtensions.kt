@@ -12,6 +12,7 @@ val ns: String? = null
 /**
  * General parsing
  */
+//TODO: handle the parsing errors.
 @Throws(IOException::class, XmlPullParserException::class)
 fun XmlPullParser.parseTag(startTag: TeiTag): ParsedXml.Tag {
     //Todo: We can curry the parsing here with these three things. And then handle throwing via an Either block.

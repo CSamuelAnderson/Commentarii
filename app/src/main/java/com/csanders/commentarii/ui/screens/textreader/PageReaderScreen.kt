@@ -45,8 +45,7 @@ fun PageReaderScreen(viewModel: TextReaderViewModel = hiltViewModel()) {
                 contextForToast,
                 updatedBook.value.message,
                 Toast.LENGTH_SHORT
-            )
-                .show()
+            ).show()
             is Either.Right -> {
                 book = updatedBook.value
             }

@@ -13,7 +13,6 @@ import kotlin.reflect.KClass
 //          2) Encourages the use of strongly typing functions involved with Xml. e.g. findTag must take a Tag object, not any string, or createStyling must take Stylistic attribute, not any attribute.
 //      This conversion will continue to be a work in progress as account for more tags
 
-sealed class Tei
 
 /**
  * Basically what I want is a bijective function from TeiTag to String. Enums get that pretty easily.
@@ -44,33 +43,54 @@ fun getXmlTagStrings(): Map<String, TeiTag> {
     return TeiTag::class.listNestedSealedSubClasses().mapNotNull { it.objectInstance }.associateBy { it.tag }
 }
 
-fun getXmlAttributeStrings(): Map<String, TeiAttribute> {
-    return TeiAttribute::class.listNestedSealedSubClasses().mapNotNull { it.objectInstance }.associateBy { it.attribute }
+/**
+ * Tags are the sections which categorize Xml texts or sub-tags
+ * Starting tags categorize the start of either a book or a library
+ * e.g. "TEI" or "TeiCorpus"
+ */
+sealed class TeiTag(val tag: String)
+
+sealed class StartingTag(tag: String) : TeiTag(tag) {
+    object TeiBook : StartingTag("TEI")
+    object TeiCorpus : StartingTag("teiCorpus")
 }
 
 /**
- * Tags are the sections which categorize Xml texts or sub-tags
- * Primary tags categorize fundamental components of a TEI file or a component of a book, e.g. "TEI" or "TeiCorpus" for the start of a new book or library
+ * Metadata tags are used to navigate or hold info about the work, but are usually not an a part of the work's content.
+ * e.g. FileDescription holds references to descriptions to the file, Author holds the name of the author
  */
-sealed class TeiTag(val tag: String) : Tei()
-sealed class PrimaryTag(tag: String) : TeiTag(tag) {
-    object TeiBook : PrimaryTag("TEI")
-    object TeiCorpus : PrimaryTag("teiCorpus")
+sealed class MetadataTag(tag: String) : TeiTag(tag) {
+    object TeiHeader : MetadataTag("teiHeader")
+    object FileDescription : MetadataTag("fileDesc")
+
+    object TitleStatement : MetadataTag("titleStmt")
+    object Author : MetadataTag("author")
+    object Title : MetadataTag("title")
+
+    object ProfileDescription : MetadataTag("profileDesc")
+    object LanguagesUsed : MetadataTag("langUsage")
+    object Language : MetadataTag("language")
+
+
 }
 
-sealed class HeaderTag(tag: String) : TeiTag(tag) {
-    object TeiHeader : HeaderTag("teiHeader")
-
-
-}
-
+/**
+ * Text Tags are used to navigate or hold hte actual text the app should display.
+ */
 sealed class TextTag(tag: String) : TeiTag(tag) {
-    object Text : TextTag("text")
+    object TeiText : TextTag("text")
     object TextBody : TextTag("body")
 }
 
+/**
+ * Division tags are used to indicate that the app should set a page break
+ */
 sealed class DivisionTag(tag: String) : TeiTag(tag) {
     object Div : DivisionTag("div")
+}
+
+sealed class SectiionTag(tag: String): TeiTag(tag) {
+    object Paragraph : SectiionTag("p")
 }
 
 /**
@@ -113,12 +133,12 @@ private enum class TEIElement(val element: String) {
     StageDirection("stage"),
 
     //Header stuff
-    FileDescription("fileDesc"),
+//    FileDescription("fileDesc"),
 
     //Title
-    TitleStatement("titleStmt"),
-    Title("title"),
-    Author("author"),
+//    TitleStatement("titleStmt"),
+//    Title("title"),
+//    Author("author"),
 
     //Publication
     PublicationStatement("publicationStmt"),
@@ -129,8 +149,8 @@ private enum class TEIElement(val element: String) {
     BibliographicList("listBible"),
 
     //Profile
-    ProfileDescription("profileDesc"),
-    LanguagesUsed("langUsage"),
+//    ProfileDescription("profileDesc"),
+//    LanguagesUsed("langUsage"),
     Language("language"),
 
     //Languages
@@ -139,25 +159,10 @@ private enum class TEIElement(val element: String) {
     English("en")
 }
 
-/**
- * Attributes are flags encoded within a Tei tag that give further instructions within that passage
- * Stylistic attributes instruct how a passage should be formatted, e.g. in italics, as a spoken line, etc.
- * Marginal attributes indicate that an editor has added metatext of some kind, e.g. a date conversion, a note, abbreviations, etc.
- * Metadata attributes indicate other data added to a passage, e.g. the language
- */
-sealed class TeiAttribute(val attribute: String) : Tei()
-sealed class StylisticAttribute(attribute: String) : TeiAttribute(attribute) {
-    object Render : StylisticAttribute("rend")
-    object Highlighted : StylisticAttribute("hi")
-}
-
-sealed class EditorialAttribute(attribute: String) : TeiAttribute(attribute)
-sealed class MetadataAttribute(attribute: String) : TeiAttribute(attribute)
-
 private enum class TEIAttributeElements(val attribute: String) {
     //Overall
     XmlID("xml:id"),
-    ReferenceNumber("n"),
+//    ReferenceNumber("n"),
     Responsibility("resp"), //Encodes which person or body is responsible for the formatting, e.g. Perseus
     Language("xml:lang"),
 
