@@ -1,6 +1,9 @@
 package com.csanders.commentarii.utilities
 
 import android.util.Xml
+import com.csanders.commentarii.datamodel.DivisionTag
+import com.csanders.commentarii.datamodel.MetadataAttribute
+import com.csanders.commentarii.datamodel.TeiAttribute
 import org.junit.Assert
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParser
@@ -22,12 +25,12 @@ class ParserExtensionsTest {
     fun parsesMultipleAttributes() {
         val tagWithThreeAttributes = "<div type=\"textpart\" n=\"5\" subtype=\"chapter\">"
         val parser = setupParser(tagWithThreeAttributes)
-        val observedAttributes = parser.readTagAttributes("div")
+        val observedAttributes = parser.readTagAttributes(DivisionTag.Div)
 
         val expectedAttributes = buildMap {
-            put("type", "textpart")
-            put("n", "5")
-            put("subtype", "chapter")
+            put(TeiAttribute.Type, "textpart")
+            put(MetadataAttribute.ReferenceNumber, "5")
+            put(TeiAttribute.Subtype, "chapter")
         }
 
         expectedAttributes.forEach {
@@ -39,7 +42,7 @@ class ParserExtensionsTest {
     fun tagWithNoAttributesReturnsEmptyMap() {
         val tagWithNoAttributes = "<div>"
         val parser = setupParser(tagWithNoAttributes)
-        val observedAttributes = parser.readTagAttributes("div")
+        val observedAttributes = parser.readTagAttributes(DivisionTag.Div)
 
         val expectedAttributes = mapOf<String, String>()
 

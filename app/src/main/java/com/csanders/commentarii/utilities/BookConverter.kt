@@ -27,7 +27,8 @@ fun convertToBook(parsedXml: ParsedXml.Tag): Book {
         /**
          * We'll eventually want to wrap this in a Result or something, so we can handle bad cases like this.
          */
-//        return EmptyBook()
+        Log.d(null,NotTeiError.message)
+        //Do something instead of returning null.
     }
     val header = parsedXml.convertToHeader()
 
@@ -142,7 +143,7 @@ private fun ParsedXml.Tag.convertToChapters(): Pages {
                         stackOfXml.addAll(parsedXml.subXml.reversed())
 
                         //Todo: we should probably make page break a core piece of the type.
-                        when (parsedXml) {
+                        when (parsedXml.tag) {
                             is DivisionTag -> convertSubXmlToChapters(
                                 stackOfXml,
                                 chapters + accChapter,
